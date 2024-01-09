@@ -1,11 +1,11 @@
 .app {
-  font-family: 'Arial', sans-serif;
+  font-family: "Arial", sans-serif;
   text-align: center;
   padding: 0px;
 }
 
 .header {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   padding: 1px;
   margin-bottom: 5px;
@@ -30,7 +30,7 @@
   margin: 3px;
   border: none;
   border-radius: 4px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   cursor: pointer;
 }
@@ -73,7 +73,9 @@
   display: flex;
   padding: 10px;
   align-items: center; /* 中央揃え */
-  border-radius: 4px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  box-sizing: content-box;
 }
 
 /* 削除ボタンのスタイル */
@@ -95,7 +97,8 @@
 
 /* オプショナル：小さいスクリーンでの見た目を調整 */
 @media (max-width: 600px) {
-  .task-input input[type="text"], .task-input button {
+  .task-input input[type="text"],
+  .task-input button {
     width: 100%; /* 入力フィールドとボタンの幅を100%に設定 */
     margin: 5px 0; /* 上下のマージンを設定 */
   }

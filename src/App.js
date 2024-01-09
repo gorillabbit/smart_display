@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import './App.css'; // スタイルシートをインポート
+import React, { useState, useEffect } from "react";
+import "./App.css"; // スタイルシートをインポート
 
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { addDoc, collection, onSnapshot, updateDoc, deleteDoc, doc } from "firebase/firestore"; 
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  updateDoc,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
+import GoogleCalendar from "./calender.js";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -24,30 +32,41 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-console.log('start_app')
+console.log("start_app");
 
+const defaultNewTask = {
+  text: "",
+  期日: "",
+};
 
-function  App() {
+function App() {
   const [tasks, setTasks] = useState([]);
-  const [newTask, setNewTask] = useState('');
+  const [newTask, setNewTask] = useState(defaultNewTask);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "tasks"), (querySnapshot) => {
-      const tasksData = querySnapshot.docs.map(doc => ({
+      const tasksData = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
       setTasks(tasksData);
-      console.log("データ取得")
     });
-  
+
     // コンポーネントがアンマウントされるときに購読を解除
     return () => unsubscribe();
   }, []);
 
+  const handleNewTask = (e) => {
+    setNewTask((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    console.log(newTask);
+  };
+
   const addTask = () => {
     if (newTask) {
-      setTasks([...tasks, { text: newTask, isCompleted: false }]);
+      setTasks([
+        ...tasks,
+        { text: newTask.text, isCompleted: false, 期日: newTask.期日 },
+      ]);
       try {
         const docRef = addDoc(collection(db, "tasks"), {
           text: newTask,
@@ -57,12 +76,12 @@ function  App() {
       } catch (e) {
         console.error("タスク追加エラー: ", e);
       }
-      setNewTask('');
+      setNewTask(defaultNewTask);
     }
   };
 
   const toggleCompletion = (id, completed) => {
-    console.log(id)
+    console.log(id);
     try {
       const docRef = updateDoc(doc(db, "tasks", id), {
         completed: !completed,
@@ -89,16 +108,23 @@ function  App() {
       </div>
       <div className="task-input">
         <input
+          name="text"
           type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
+          value={newTask.text}
+          onChange={handleNewTask}
           placeholder="タスクを入力"
         />
+        <input
+          name="期日"
+          type="date"
+          value={newTask.期日}
+          onChange={handleNewTask}
+        ></input>
         <button onClick={addTask}>追加</button>
       </div>
       <ul className="task-list">
         {tasks.map((task, index) => (
-          <li key={index} className={task.isCompleted ? 'completed' : ''}>
+          <li key={index} className={task.isCompleted ? "completed" : ""}>
             <div className="task-content">
               <label className="custom-checkbox">
                 <input
@@ -109,11 +135,13 @@ function  App() {
                 <span className="checkbox-mark"></span>
               </label>
               <span className="task-text">{task.text}</span>
+              <span>{task.期日}</span>
             </div>
-          <button onClick={() => deleteTask(task.id)}>削除</button>
-        </li>
+            <button onClick={() => deleteTask(task.id)}>削除</button>
+          </li>
         ))}
       </ul>
+      <GoogleCalendar /> {/* GoogleCalendar コンポーネントの使用 */}
     </div>
   );
 }
