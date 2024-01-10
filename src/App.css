@@ -39,28 +39,9 @@
   background-color: #45a049;
 }
 
-.task-list {
-  list-style-type: none;
-  padding: 5px;
-}
-
-/* タスクリストアイテムのスタイル */
-.task-list li {
-  display: flex;
-  align-items: stretch; /* アイテムを縦方向に伸ばす */
-  background-color: #f9f9f9;
-  margin-top: 5px;
-}
-
-.task-list li.completed {
-  text-decoration: line-through;
-  color: #888;
-}
-
 .task-text {
   text-align: left;
   flex-grow: 1; /* 利用可能なスペースをすべて使用 */
-  margin: 0 10px;
   word-break: break-all; /* 単語の途中でも折り返す */
   word-wrap: break-word; /* 長い単語でも折り返す */
   overflow-wrap: break-word; /* 長い単語を折り返す（互換性のため） */
@@ -68,7 +49,6 @@
 
 /* タスクテキストとチェックボックスのコンテナ */
 .task-content {
-  border: 1px solid #ddd;
   flex-grow: 1;
   display: flex;
   padding: 10px;
@@ -79,7 +59,7 @@
 }
 
 /* 削除ボタンのスタイル */
-.task-list li button {
+.deleteButton {
   flex-shrink: 0; /* ボタンの縮小を防止 */
   background-color: #f44336; /* 赤色 */
   color: white;
@@ -91,7 +71,7 @@
   padding: 10px; /* パディングを調整 */
 }
 
-.task-list li button:hover {
+.deleteButton:hover {
   background-color: #d32f2f; /* 濃い赤色 */
 }
 
@@ -121,7 +101,7 @@
   height: 20px;
   width: 20px;
   background-color: #fff; /* 背景色を白に設定 */
-  border: 2px solid #ddd; /* 枠線を追加 */
+
   border-radius: 4px;
   position: relative;
   cursor: pointer;
