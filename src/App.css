@@ -11,28 +11,37 @@
   margin-bottom: 5px;
 }
 
-.task-input {
-  display: flex; /* Flexboxを使用 */
-  flex-wrap: wrap; /* コンテンツが折り返し可能に */
-  margin: 10px;
+/* Flexboxの共通スタイル */
+.flex-container {
+  display: flex;
+  flex-grow: 1;
 }
 
-.task-input input[type="text"] {
-  flex-grow: 1; /* 利用可能なスペースをすべて使用 */
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-end-container {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 入力フィールドの共通スタイル */
+.input-field {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
-  margin-right: 10px; /* ボタンとの間にマージンを追加 */
+  margin: 3px;
 }
 
-.task-input button {
+.input-button {
   padding: 10px;
-  margin: 3px;
   border: none;
   border-radius: 4px;
   background-color: #4caf50;
   color: white;
   cursor: pointer;
+  margin: 3px;
 }
 
 .task-input button:hover {

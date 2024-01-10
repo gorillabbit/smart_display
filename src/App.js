@@ -16,6 +16,7 @@ import {
 const defaultNewTask = {
   text: "",
   期日: new Date().toISOString().slice(0, -8),
+  is周期的: "周期なし",
   周期1: "",
   周期2: 0,
   周期3: "",
@@ -54,23 +55,38 @@ function App() {
   }, []);
 
   const handleNewTask = (e) => {
-    console.log(e);
     setNewTask((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     console.log(newTask);
   };
 
   const addTask = () => {
     if (newTask) {
-      setTasks([...tasks, { ...newTask, isCompleted: false }]);
-      try {
-        const docRef = addDoc(collection(db, "tasks"), {
-          ...newTask,
-          completed: false,
-          timestamp: serverTimestamp(),
-        });
-        console.log("タスク追加成功 ID: ", docRef.id);
-      } catch (e) {
-        console.error("タスク追加エラー: ", e);
+      //周期のバリデーション
+      if (newTask.is周期的 === "周期なし") {
+        const { 周期1, 周期2, 周期3, ...周期除外newTask } = newTask;
+        setTasks([...tasks, { ...周期除外newTask, isCompleted: false }]);
+        try {
+          const docRef = addDoc(collection(db, "tasks"), {
+            ...周期除外newTask,
+            completed: false,
+            timestamp: serverTimestamp(),
+          });
+          console.log("周期なしタスク追加成功 ID: ", docRef.id);
+        } catch (e) {
+          console.error("周期なしタスク追加エラー: ", e);
+        }
+      } else {
+        setTasks([...tasks, { ...newTask, isCompleted: false }]);
+        try {
+          const docRef = addDoc(collection(db, "tasks"), {
+            ...newTask,
+            completed: false,
+            timestamp: serverTimestamp(),
+          });
+          console.log("タスク追加成功 ID: ", docRef.id);
+        } catch (e) {
+          console.error("タスク追加エラー: ", e);
+        }
       }
       setNewTask(defaultNewTask);
     }
@@ -82,38 +98,75 @@ function App() {
         <h1>TODOリスト</h1>
         <Clock />
       </div>
-      <div className="task-input">
-        <input
-          name="text"
-          type="text"
-          value={newTask.text}
-          onChange={handleNewTask}
-          placeholder="タスクを入力"
-        />
-        <input
-          name="期日"
-          type="datetime-local"
-          value={newTask.期日}
-          onChange={handleNewTask}
-        />
-        <select name="周期1" value={newTask.周期1} onChange={handleNewTask}>
-          <option value="">-</option>
-          <option value="毎">毎</option>
-          <option value="隔">隔</option>
-        </select>
-        <input
-          name="周期2"
-          type="number"
-          value={newTask.周期2}
-          onChange={handleNewTask}
-        />
-        <select name="周期3" value={newTask.周期3} onChange={handleNewTask}>
-          <option value="">-</option>
-          <option value="日">日</option>
-          <option value="週">週</option>
-          <option value="月">月</option>
-        </select>
-        <button onClick={addTask}>追加</button>
+      <div className="flex-container">
+        <div className="inputForm flex-grow">
+          <div className="text期日Input flex-container">
+            <input
+              className="textInput input-field flex-grow"
+              name="text"
+              type="text"
+              value={newTask.text}
+              onChange={handleNewTask}
+              placeholder="タスクを入力"
+            />
+            <p>期日</p>
+            <input
+              className="期日Input input-field"
+              name="期日"
+              type="datetime-local"
+              value={newTask.期日}
+              onChange={handleNewTask}
+            />
+          </div>
+          <div className="周期Input flex-end-container">
+            <p>周期</p>
+            <select
+              className="input-field"
+              name="is周期的"
+              value={newTask.is周期的}
+              onChange={handleNewTask}
+            >
+              <option value="周期なし">周期なし</option>
+              <option value="完了後に追加">完了後にタスクを追加</option>
+              <option value="必ず追加">必ず追加</option>
+            </select>
+            <select
+              className="input-field"
+              name="周期1"
+              value={newTask.周期1}
+              onChange={handleNewTask}
+              disabled={newTask.is周期的 === "周期なし"}
+            >
+              <option value="">-</option>
+              <option value="毎">毎</option>
+              <option value="隔">隔</option>
+            </select>
+            <input
+              className="input-field"
+              name="周期2"
+              type="number"
+              value={newTask.周期2}
+              onChange={handleNewTask}
+              disabled={newTask.is周期的 === "周期なし"}
+            />
+            <select
+              className="input-field"
+              name="周期3"
+              value={newTask.周期3}
+              onChange={handleNewTask}
+              disabled={newTask.is周期的 === "周期なし"}
+            >
+              <option value="">-</option>
+              <option value="日">日</option>
+              <option value="週">週</option>
+              <option value="月">月</option>
+            </select>
+          </div>
+        </div>
+        <button className="input-button" onClick={addTask}>
+          {" "}
+          追加
+        </button>
       </div>
       <ul className="task-list">
         {tasks.map((task) => (
