@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./App.css"; // スタイルシートをインポート
 import { db } from "./firebase.js";
 
@@ -41,14 +41,17 @@ const completedTaskListStyle = {
   color: "#5f5f5f",
 };
 
-function Task({ task, setTask }) {
+function Task({ task, setTask, tasklist, type }) {
   const backgroundColor = getBackgroundColor(task.期日);
   const listStyle =
     task.completed === true
       ? { ...tasklistStyle, ...completedTaskListStyle, backgroundColor }
       : { ...tasklistStyle, backgroundColor };
+  const 小taskStyle =
+    type === "小タスク" ? { border: "solid 2px #ffffff" } : {};
   const is完了後追加 = task.is周期的 === "完了後に追加";
   const is必ず追加 = task.is周期的 === "必ず追加";
+  const [open, setOpen] = useState(false);
 
   const calculateNext期日 = (task) => {
     const currentDate = new Date();
@@ -114,11 +117,28 @@ function Task({ task, setTask }) {
     }
   };
 
+  console.log(tasklist);
+
+  const 子tasks = tasklist?.filter((listTask) => listTask.親taskId === task.id);
+
+  const containerStyle = {
+    // openの値に応じてスタイルを変更
+    height: open ? "100%" : "50%", // 例として、open時に幅を100%に、そうでない場合は50%に
+    transition: "width 0.3s", // スムーズなアニメーションのため
+    // その他のスタイル
+  };
+
+  const handleTaskClick = (event) => {
+    event.stopPropagation();
+    setOpen(!open);
+  };
+
   return (
     <li
       key={task.id}
       className={task.completed ? "completed" : ""}
-      style={listStyle}
+      style={{ ...listStyle, ...containerStyle, ...小taskStyle }}
+      onClick={handleTaskClick}
     >
       <div className="task-content">
         <label className="custom-checkbox">
@@ -129,28 +149,47 @@ function Task({ task, setTask }) {
           />
           <span className="checkbox-mark"></span>
         </label>
-        <div style={{ display: "flex", width: "100%" }}>
-          <span className="task-text" style={{ width: "100%" }}>
-            {task.text}
-          </span>
-          <span className="task-周期" style={{ width: "100%" }}>
-            周期{is完了後追加 && " タスク完了後 "} {task.周期2} {task.周期3}
-          </span>
-          {task.completed && task.toggleCompletionTimestamp ? (
-            <span style={{ width: "100%", textAlign: "right" }}>
-              済{" "}
-              {format(
-                task.toggleCompletionTimestamp.toDate(),
-                "yyyy-MM-dd HH:mm"
-              )}
+        <div style={{ width: "100%" }}>
+          <div style={{ display: "flex", width: "100%" }}>
+            <span className="task-text" style={{ width: "100%" }}>
+              {task.text}
             </span>
-          ) : (
-            <div />
+            <span className="task-周期" style={{ width: "100%" }}>
+              周期{is完了後追加 && " タスク完了後 "} {task.周期2} {task.周期3}
+            </span>
+            <span style={{ width: "100%", textAlign: "right" }}>
+              {task.期日 ? "期日 " : ""}
+              {task.期日} {task.時刻}
+            </span>
+          </div>
+          {open && (
+            <div
+              className="task-details"
+              style={{ width: "100%", textAlign: "right" }}
+            >
+              {task.completed && task.toggleCompletionTimestamp ? (
+                <span style={{ width: "100%", textAlign: "right" }}>
+                  済{" "}
+                  {format(
+                    task.toggleCompletionTimestamp.toDate(),
+                    "yyyy-MM-dd HH:mm"
+                  )}
+                </span>
+              ) : (
+                <div />
+              )}
+              <ul className="task-list">
+                {子tasks?.map((子task) => (
+                  <Task
+                    type="小タスク"
+                    key={子task.id}
+                    task={子task}
+                    setTask={setTask}
+                  />
+                ))}
+              </ul>
+            </div>
           )}
-          <span style={{ width: "100%", textAlign: "right" }}>
-            {task.期日 ? "期日 " : ""}
-            {task.期日} {task.時刻}
-          </span>
         </div>
       </div>
       <button className="deleteButton" onClick={() => deleteTask(task.id)}>

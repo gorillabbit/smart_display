@@ -27,7 +27,8 @@ const defaultNewTask = {
 };
 
 function App() {
-  const [tasks, setTasks] = useState([]);
+  const [tasklist, setTaskList] = useState([]);
+  const [unCompletedTasks, setUnCompletedTasks] = useState([]);
   const [completedTasks, setCompletedTasks] = useState([]);
   const [newTask, setNewTask] = useState(defaultNewTask);
 
@@ -45,7 +46,8 @@ function App() {
         ...doc.data(),
       }));
       console.log(tasksData);
-      setTasks(tasksData.filter((data) => data.completed === false));
+      setTaskList(tasksData);
+      setUnCompletedTasks(tasksData.filter((data) => data.completed === false));
       setCompletedTasks(
         tasksData
           .filter((data) => data.completed === true)
@@ -72,7 +74,10 @@ function App() {
       //周期のバリデーション
       if (newTask.is周期的 === "周期なし") {
         const { 周期2, 周期3, ...周期除外newTask } = newTask;
-        setTasks([...tasks, { ...周期除外newTask, isCompleted: false }]);
+        setUnCompletedTasks([
+          ...unCompletedTasks,
+          { ...周期除外newTask, isCompleted: false },
+        ]);
         try {
           const docRef = addDoc(collection(db, "tasks"), {
             ...周期除外newTask,
@@ -84,7 +89,10 @@ function App() {
           console.error("周期なしタスク追加エラー: ", e);
         }
       } else {
-        setTasks([...tasks, { ...newTask, isCompleted: false }]);
+        setUnCompletedTasks([
+          ...unCompletedTasks,
+          { ...newTask, isCompleted: false },
+        ]);
         try {
           const docRef = addDoc(collection(db, "tasks"), {
             ...newTask,
@@ -174,14 +182,19 @@ function App() {
         </button>
       </div>
       <ul className="task-list">
-        {tasks.map((task) => (
-          <Task key={task.id} task={task} setTask={setTasks} />
+        {unCompletedTasks.map((task) => (
+          <Task
+            key={task.id}
+            task={task}
+            setTask={setUnCompletedTasks}
+            tasklist={tasklist}
+          />
         ))}
       </ul>
       <ul>完了済みタスク</ul>
       <ul className="completedTaskList">
         {completedTasks.map((task) => (
-          <Task key={task.id} task={task} />
+          <Task key={task.id} task={task} tasklist={tasklist} />
         ))}
       </ul>
     </div>
