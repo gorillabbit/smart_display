@@ -3,6 +3,7 @@ import "./App.css"; // スタイルシートをインポート
 import Clock from "./clock.js";
 import Task from "./task.js";
 import { db } from "./firebase.js";
+import { format } from "date-fns";
 
 import {
   orderBy,
@@ -13,11 +14,14 @@ import {
   query,
 } from "firebase/firestore";
 
+const now = new Date();
+const formattedDate = format(now, "yyyy-MM-dd");
+
 const defaultNewTask = {
   text: "",
-  期日: new Date().toISOString().slice(0, -8),
+  期日: formattedDate,
+  時刻: "00:00",
   is周期的: "周期なし",
-  周期1: "",
   周期2: 0,
   周期3: "",
 };
@@ -29,7 +33,11 @@ function App() {
 
   useEffect(() => {
     const tasksCollectionRef = collection(db, "tasks");
-    const tasksQuery = query(tasksCollectionRef, orderBy("期日"));
+    const tasksQuery = query(
+      tasksCollectionRef,
+      orderBy("期日"),
+      orderBy("時刻")
+    );
 
     const unsubscribe = onSnapshot(tasksQuery, (querySnapshot) => {
       const tasksData = querySnapshot.docs.map((doc) => ({
@@ -63,7 +71,7 @@ function App() {
     if (newTask) {
       //周期のバリデーション
       if (newTask.is周期的 === "周期なし") {
-        const { 周期1, 周期2, 周期3, ...周期除外newTask } = newTask;
+        const { 周期2, 周期3, ...周期除外newTask } = newTask;
         setTasks([...tasks, { ...周期除外newTask, isCompleted: false }]);
         try {
           const docRef = addDoc(collection(db, "tasks"), {
@@ -113,8 +121,15 @@ function App() {
             <input
               className="期日Input input-field"
               name="期日"
-              type="datetime-local"
+              type="date"
               value={newTask.期日}
+              onChange={handleNewTask}
+            />
+            <input
+              className="時刻Input input-field"
+              name="時刻"
+              type="time"
+              value={newTask.時刻}
               onChange={handleNewTask}
             />
           </div>
@@ -129,17 +144,6 @@ function App() {
               <option value="周期なし">周期なし</option>
               <option value="完了後に追加">完了後にタスクを追加</option>
               <option value="必ず追加">必ず追加</option>
-            </select>
-            <select
-              className="input-field"
-              name="周期1"
-              value={newTask.周期1}
-              onChange={handleNewTask}
-              disabled={newTask.is周期的 === "周期なし"}
-            >
-              <option value="">-</option>
-              <option value="毎">毎</option>
-              <option value="隔">隔</option>
             </select>
             <input
               className="input-field"
@@ -160,6 +164,7 @@ function App() {
               <option value="日">日</option>
               <option value="週">週</option>
               <option value="月">月</option>
+              <option value="年">年</option>
             </select>
           </div>
         </div>
@@ -170,7 +175,7 @@ function App() {
       </div>
       <ul className="task-list">
         {tasks.map((task) => (
-          <Task key={task.id} task={task} />
+          <Task key={task.id} task={task} setTask={setTasks} />
         ))}
       </ul>
       <ul>完了済みタスク</ul>
