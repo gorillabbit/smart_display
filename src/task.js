@@ -10,8 +10,6 @@ import {
   addDoc,
   collection,
 } from "firebase/firestore";
-
-import { formatJapaneseDate } from "./utilities/timeFormat.js";
 import { format } from "date-fns";
 
 function getBackgroundColor(dueDate) {
