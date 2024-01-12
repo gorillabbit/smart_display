@@ -47,8 +47,7 @@ function Task({ task, setTask, tasklist, type }) {
     task.completed === true
       ? { ...tasklistStyle, ...completedTaskListStyle, backgroundColor }
       : { ...tasklistStyle, backgroundColor };
-  const 小taskStyle =
-    type === "小タスク" ? { border: "solid 2px #ffffff" } : {};
+  const 小taskStyle = type === "子task" ? { border: "solid 2px #ffffff" } : {};
   const is完了後追加 = task.is周期的 === "完了後に追加";
   const is必ず追加 = task.is周期的 === "必ず追加";
   const [open, setOpen] = useState(false);
@@ -98,11 +97,10 @@ function Task({ task, setTask, tasklist, type }) {
       };
       setTask((tasklist) => [...tasklist, newTask]);
       try {
-        const docRef = addDoc(collection(db, "tasks"), {
+        addDoc(collection(db, "tasks"), {
           ...newTask,
           timestamp: serverTimestamp(),
         });
-        console.log("タスク追加成功 ID: ", docRef.id);
       } catch (e) {
         console.error("タスク追加エラー: ", e);
       }
@@ -117,9 +115,9 @@ function Task({ task, setTask, tasklist, type }) {
     }
   };
 
-  console.log(tasklist);
-
   const 子tasks = tasklist?.filter((listTask) => listTask.親taskId === task.id);
+  console.log(子tasks);
+  const 親task = tasklist?.filter((listTask) => listTask.id === task.親taskId);
 
   const containerStyle = {
     // openの値に応じてスタイルを変更
@@ -178,15 +176,33 @@ function Task({ task, setTask, tasklist, type }) {
               ) : (
                 <div />
               )}
-              <ul className="task-list">
-                {子tasks?.map((子task) => (
+              {type !== "子task" && task.親taskId ? (
+                <div style={{ textAlign: "left" }}>
+                  親タスク
                   <Task
-                    type="小タスク"
-                    key={子task.id}
-                    task={子task}
+                    type="子task"
+                    key={task.親taskId + "子task"}
+                    task={親task[0]}
                     setTask={setTask}
                   />
-                ))}
+                </div>
+              ) : (
+                <div />
+              )}
+              <ul className="task-list">
+                {子tasks?.length && (
+                  <div style={{ textAlign: "left" }}>
+                    子task
+                    {子tasks?.map((子task) => (
+                      <Task
+                        type="子task"
+                        key={子task.id}
+                        task={子task}
+                        setTask={setTask}
+                      />
+                    ))}
+                  </div>
+                )}
               </ul>
             </div>
           )}
