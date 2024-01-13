@@ -12,3 +12,16 @@ export interface Task {
   親taskId?: string;
   toggleCompletionTimestamp?: Timestamp;
 }
+export interface LogsCompleteLogs {
+  id?: string;
+  logId: string;
+  timestamp?: Timestamp;
+}
+
+export interface Log {
+  id?: string;
+  text: string;
+  親logId?: string;
+  timestamp?: Timestamp;
+  completeLogs?: LogsCompleteLogs[];
+}

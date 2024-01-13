@@ -8,6 +8,7 @@ import {
   deleteDoc,
   doc,
   updateDoc,
+  setDoc,
 } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -53,5 +54,35 @@ export const updateDocTask = (id, feature) => {
     updateDoc(doc(db, "tasks", id), feature);
   } catch (e) {
     console.error("タスク切り替えエラー: ", e);
+  }
+};
+
+export const addDocLog = (log) => {
+  try {
+    return addDoc(collection(db, "logs"), {
+      ...log,
+      timestamp: serverTimestamp(),
+    });
+  } catch (e) {
+    console.error("タスク追加エラー: ", e);
+  }
+};
+
+export const deleteDocLog = (id) => {
+  try {
+    deleteDoc(doc(db, "logs", id));
+  } catch (e) {
+    console.error("記録削除エラー: ", e);
+  }
+};
+
+export const addDocLogsCompleteLogs = (log) => {
+  try {
+    return addDoc(collection(db, "logsCompleteLogs"), {
+      ...log,
+      timestamp: serverTimestamp(),
+    });
+  } catch (e) {
+    console.error("タスク追加エラー: ", e);
   }
 };
