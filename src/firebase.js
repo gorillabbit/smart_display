@@ -1,6 +1,14 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
@@ -19,3 +27,31 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
+
+export const addDocTask = (task) => {
+  try {
+    addDoc(collection(db, "tasks"), {
+      ...task,
+      completed: false,
+      timestamp: serverTimestamp(),
+    });
+  } catch (e) {
+    console.error("タスク追加エラー: ", e);
+  }
+};
+
+export const deleteDocTask = (id) => {
+  try {
+    deleteDoc(doc(db, "tasks", id));
+  } catch (e) {
+    console.error("タスク削除エラー: ", e);
+  }
+};
+
+export const updateDocTask = (id, feature) => {
+  try {
+    updateDoc(doc(db, "tasks", id), feature);
+  } catch (e) {
+    console.error("タスク切り替えエラー: ", e);
+  }
+};

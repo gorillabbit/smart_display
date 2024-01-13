@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "./App.css"; // スタイルシートをインポート
-import Clock from "./clock.js";
-import Task from "./task.js";
-import { db } from "./firebase.js";
+import "./App.css";
+import Clock from "./components/clock.js";
+import Task from "./components/task.tsx";
+import { db, addDocTask } from "./firebase.js";
 import { format } from "date-fns";
-
-import {
-  orderBy,
-  serverTimestamp,
-  addDoc,
-  collection,
-  onSnapshot,
-  query,
-} from "firebase/firestore";
+import { checkTaskDue, calculateNext期日 } from "./utilities/dateUtilites.js";
+import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
 
 const now = new Date();
 const formattedDate = format(now, "yyyy-MM-dd");
@@ -45,8 +38,8 @@ function App() {
         id: doc.id,
         ...doc.data(),
       }));
-      console.log(tasksData);
       setTaskList(tasksData);
+      console.log("tasksData", tasksData);
       setUnCompletedTasks(tasksData.filter((data) => data.completed === false));
       setCompletedTasks(
         tasksData
@@ -64,9 +57,53 @@ function App() {
     return () => unsubscribe();
   }, []);
 
+  const addNewTasksIfNeeded = () => {
+    const newTasks = [];
+    tasklist.forEach((task) => {
+      if (task.is周期的 === "必ず追加" && tasklist.length !== 0) {
+        const diffTime = checkTaskDue(task.期日 + " " + task.時刻);
+        if (diffTime < 0) {
+          const next期日 = calculateNext期日(task, new Date(task.期日));
+          const 同一期日tasks = tasklist?.filter(
+            (listTask) => listTask.期日 === next期日
+          );
+          const 子tasks = 同一期日tasks.filter(
+            (同一期日task) => 同一期日task.親taskId === task.id
+          );
+          const 兄弟tasks = 同一期日tasks.filter(
+            (同一期日task) => 同一期日task.親taskId === task.親taskId
+          );
+          //console.log(子tasks, 兄弟tasks);
+          if (子tasks.length === 0 && 兄弟tasks.length === 0) {
+            const newTask = {
+              text: task.text,
+              期日: next期日,
+              時刻: task.時刻,
+              is周期的: "必ず追加",
+              周期2: task.周期2,
+              周期3: task.周期3,
+              親taskId: task.親taskId ?? task.id,
+            };
+            newTasks.push(newTask);
+          }
+        }
+      }
+    });
+    return newTasks;
+  };
+
+  useEffect(() => {
+    const newTasks = addNewTasksIfNeeded();
+    if (newTasks.length > 0 && tasklist.length < 10) {
+      setUnCompletedTasks((prevTasks) => [...prevTasks, ...newTasks]);
+      newTasks.forEach((newTask) => {
+        addDocTask(newTask);
+      });
+    }
+  }, [tasklist]); // 依存配列に tasklist だけを含める
+
   const handleNewTask = (e) => {
     setNewTask((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    console.log(newTask);
   };
 
   const addTask = () => {
@@ -78,31 +115,13 @@ function App() {
           ...unCompletedTasks,
           { ...周期除外newTask, isCompleted: false },
         ]);
-        try {
-          const docRef = addDoc(collection(db, "tasks"), {
-            ...周期除外newTask,
-            completed: false,
-            timestamp: serverTimestamp(),
-          });
-          console.log("周期なしタスク追加成功 ID: ", docRef.id);
-        } catch (e) {
-          console.error("周期なしタスク追加エラー: ", e);
-        }
+        addDocTask(周期除外newTask);
       } else {
         setUnCompletedTasks([
           ...unCompletedTasks,
           { ...newTask, isCompleted: false },
         ]);
-        try {
-          const docRef = addDoc(collection(db, "tasks"), {
-            ...newTask,
-            completed: false,
-            timestamp: serverTimestamp(),
-          });
-          console.log("タスク追加成功 ID: ", docRef.id);
-        } catch (e) {
-          console.error("タスク追加エラー: ", e);
-        }
+        addDocTask(newTask);
       }
       setNewTask(defaultNewTask);
     }
@@ -114,89 +133,91 @@ function App() {
         <h1>TODOリスト</h1>
         <Clock />
       </div>
-      <div className="flex-container">
-        <div className="inputForm flex-grow">
-          <div className="text期日Input flex-container">
-            <input
-              className="textInput input-field flex-grow"
-              name="text"
-              type="text"
-              value={newTask.text}
-              onChange={handleNewTask}
-              placeholder="タスクを入力"
-            />
-            <p>期日</p>
-            <input
-              className="期日Input input-field"
-              name="期日"
-              type="date"
-              value={newTask.期日}
-              onChange={handleNewTask}
-            />
-            <input
-              className="時刻Input input-field"
-              name="時刻"
-              type="time"
-              value={newTask.時刻}
-              onChange={handleNewTask}
-            />
+      <div className="content" style={{ padding: "0px 30px" }}>
+        <div className="flex-container">
+          <div className="inputForm flex-grow">
+            <div className="text期日Input flex-container">
+              <input
+                className="textInput input-field flex-grow"
+                name="text"
+                type="text"
+                value={newTask.text}
+                onChange={handleNewTask}
+                placeholder="タスクを入力"
+              />
+              <p>期日</p>
+              <input
+                className="期日Input input-field"
+                name="期日"
+                type="date"
+                value={newTask.期日}
+                onChange={handleNewTask}
+              />
+              <input
+                className="時刻Input input-field"
+                name="時刻"
+                type="time"
+                value={newTask.時刻}
+                onChange={handleNewTask}
+              />
+            </div>
+            <div className="周期Input flex-end-container">
+              <p>周期</p>
+              <select
+                className="input-field"
+                name="is周期的"
+                value={newTask.is周期的}
+                onChange={handleNewTask}
+              >
+                <option value="周期なし">周期なし</option>
+                <option value="完了後に追加">完了後にタスクを追加</option>
+                <option value="必ず追加">必ず追加</option>
+              </select>
+              <input
+                className="input-field"
+                name="周期2"
+                type="number"
+                value={newTask.周期2}
+                onChange={handleNewTask}
+                disabled={newTask.is周期的 === "周期なし"}
+              />
+              <select
+                className="input-field"
+                name="周期3"
+                value={newTask.周期3}
+                onChange={handleNewTask}
+                disabled={newTask.is周期的 === "周期なし"}
+              >
+                <option value="">-</option>
+                <option value="日">日</option>
+                <option value="週">週</option>
+                <option value="月">月</option>
+                <option value="年">年</option>
+              </select>
+            </div>
           </div>
-          <div className="周期Input flex-end-container">
-            <p>周期</p>
-            <select
-              className="input-field"
-              name="is周期的"
-              value={newTask.is周期的}
-              onChange={handleNewTask}
-            >
-              <option value="周期なし">周期なし</option>
-              <option value="完了後に追加">完了後にタスクを追加</option>
-              <option value="必ず追加">必ず追加</option>
-            </select>
-            <input
-              className="input-field"
-              name="周期2"
-              type="number"
-              value={newTask.周期2}
-              onChange={handleNewTask}
-              disabled={newTask.is周期的 === "周期なし"}
-            />
-            <select
-              className="input-field"
-              name="周期3"
-              value={newTask.周期3}
-              onChange={handleNewTask}
-              disabled={newTask.is周期的 === "周期なし"}
-            >
-              <option value="">-</option>
-              <option value="日">日</option>
-              <option value="週">週</option>
-              <option value="月">月</option>
-              <option value="年">年</option>
-            </select>
-          </div>
+          <button className="input-button" onClick={addTask}>
+            追加
+          </button>
         </div>
-        <button className="input-button" onClick={addTask}>
-          {" "}
-          追加
-        </button>
-      </div>
-      <ul className="task-list">
         {unCompletedTasks.map((task) => (
           <Task
             key={task.id}
             task={task}
-            setTask={setUnCompletedTasks}
+            setTasks={setUnCompletedTasks}
             tasklist={tasklist}
           />
         ))}
-      </ul>
-      <ul>完了済みタスク</ul>
-      <ul className="completedTaskList">
+        <div>完了済みタスク</div>
         {completedTasks.map((task) => (
-          <Task key={task.id} task={task} tasklist={tasklist} />
+          <Task
+            key={task.id}
+            task={task}
+            setTasks={setUnCompletedTasks}
+            tasklist={tasklist}
+          />
         ))}
-      </ul>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,6 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow } = require("electron");
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, ".env.local") });
-const { google } = require("googleapis");
-
 let win;
 function createWindow() {
   win = new BrowserWindow({

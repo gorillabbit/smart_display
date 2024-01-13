@@ -62,8 +62,7 @@
   display: flex;
   padding: 10px;
   align-items: center; /* 中央揃え */
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
+  border-radius: 4px;
   box-sizing: content-box;
 }
 
