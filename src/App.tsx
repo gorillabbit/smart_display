@@ -48,8 +48,6 @@ function App() {
     LogsCompleteLogsType[]
   >([]);
 
-  console.log(newLog);
-
   useEffect(() => {
     //Taskの取得
     const tasksQuery = query(
@@ -100,7 +98,7 @@ function App() {
 
     const logsCompleteLogsQuery = query(
       collection(db, "logsCompleteLogs"),
-      orderBy("timestamp")
+      orderBy("timestamp", "desc")
     );
     const unsubscribeLogsCompleteLogs = onSnapshot(
       logsCompleteLogsQuery,

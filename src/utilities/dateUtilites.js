@@ -1,10 +1,25 @@
-import { format } from "date-fns";
+import {
+  format,
+  differenceInDays,
+  differenceInHours,
+  differenceInMinutes,
+} from "date-fns";
 
 export const checkTaskDue = (dueString) => {
   const today = new Date();
   const due = new Date(dueString);
   const diffTime = due - today;
   return diffTime / (1000 * 60 * 60 * 24);
+};
+
+export const checkLastLogCompleted = (lastCompleted) => {
+  const today = new Date();
+  const due = new Date(lastCompleted);
+  const diffDays = differenceInDays(today, due);
+  const diffHours = differenceInHours(today, due) % 24;
+  const diffMinutes = differenceInMinutes(today, due) % 60;
+  const result = `${diffDays}日${diffHours}時間${diffMinutes}分`;
+  return result;
 };
 
 export const calculateNext期日 = (task, 更新元date) => {

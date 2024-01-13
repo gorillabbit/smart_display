@@ -1,5 +1,7 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap");
+
 .app {
-  font-family: "Arial", sans-serif;
+  font-family: "Noto Sans JP", sans-serif;
   text-align: center;
   padding: 0px;
 }
@@ -49,7 +51,7 @@
   background-color: #4caf50;
   color: #ffffff;
   cursor: pointer;
-  margin: 3px;
+  margin: 0px 3px 6px 3px;
 }
 
 .task-input button:hover {
