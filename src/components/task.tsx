@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "../App.css"; // スタイルシートをインポート
 import { addDocTask, deleteDocTask, updateDocTask } from "../firebase.js";
 import { calculateNext期日 } from "../utilities/dateUtilites.js";
@@ -6,26 +6,19 @@ import { getBackgroundColor } from "../utilities/taskUtilites.js";
 
 import { serverTimestamp } from "firebase/firestore";
 import TaskDetail from "./taskDetail.js";
+import { Task as TaskType } from "../types";
 
 interface TaskProps {
-  task: {
-    id: string;
-    text: string;
-    期日: string;
-    時刻: string;
-    completed: boolean;
-    is周期的: string;
-    周期2: string;
-    周期3: string;
-    親taskId?: string;
-  };
-  setTasks: React.Dispatch<React.SetStateAction<TaskProps["task"][]>>;
-  tasklist?: TaskProps["task"][];
-  type: string;
+  task: TaskType;
+  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
+  tasklist?: TaskType[];
+  type?: string;
 }
 
-const toggleCompletion = (task, setTasks) => {
-  //console.log(setTasks);
+const toggleCompletion = (
+  task: TaskType,
+  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>
+) => {
   updateDocTask(task.id, {
     completed: !task.completed,
     toggleCompletionTimestamp: serverTimestamp(),
@@ -40,9 +33,10 @@ const toggleCompletion = (task, setTasks) => {
       周期2: task.周期2,
       周期3: task.周期3,
       親taskId: task.親taskId ?? task.id,
+      completed: false,
     };
-    setTasks((tasklist) => [...tasklist, newTask]);
     addDocTask(newTask);
+    setTasks((tasklist) => [...tasklist, newTask]);
   }
 };
 
@@ -59,9 +53,7 @@ function ChildTasks({ tasks, setTasks }) {
 }
 
 const Task: React.FC<TaskProps> = ({ task, setTasks, tasklist }) => {
-  console.log(setTasks);
   const backgroundColor = getBackgroundColor(task.期日 + " " + task.時刻);
-
   const tasklistStyle = {
     display: "flex",
     alignItems: "stretch" /* アイテムを縦方向に伸ばす */,

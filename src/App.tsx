@@ -6,24 +6,26 @@ import { db, addDocTask } from "./firebase.js";
 import { format } from "date-fns";
 import { checkTaskDue, calculateNext期日 } from "./utilities/dateUtilites.js";
 import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
+import { Task as TaskType } from "./types";
 
 const now = new Date();
 const formattedDate = format(now, "yyyy-MM-dd");
 
-const defaultNewTask = {
+const defaultNewTask: TaskType = {
   text: "",
   期日: formattedDate,
   時刻: "00:00",
   is周期的: "周期なし",
-  周期2: 0,
+  周期2: "0",
   周期3: "",
+  completed: false,
 };
 
 function App() {
-  const [tasklist, setTaskList] = useState([]);
-  const [unCompletedTasks, setUnCompletedTasks] = useState([]);
-  const [completedTasks, setCompletedTasks] = useState([]);
-  const [newTask, setNewTask] = useState(defaultNewTask);
+  const [tasklist, setTaskList] = useState<TaskType[]>([]);
+  const [unCompletedTasks, setUnCompletedTasks] = useState<TaskType[]>([]);
+  const [completedTasks, setCompletedTasks] = useState<TaskType[]>([]);
+  const [newTask, setNewTask] = useState<TaskType>(defaultNewTask);
 
   useEffect(() => {
     const tasksCollectionRef = collection(db, "tasks");
@@ -34,9 +36,17 @@ function App() {
     );
 
     const unsubscribe = onSnapshot(tasksQuery, (querySnapshot) => {
-      const tasksData = querySnapshot.docs.map((doc) => ({
+      const tasksData: TaskType[] = querySnapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data(),
+        text: doc.data().text,
+        期日: doc.data().期日,
+        時刻: doc.data().時刻,
+        is周期的: doc.data().is周期的,
+        周期2: doc.data().周期2,
+        周期3: doc.data().周期3,
+        completed: doc.data().completed,
+        toggleCompletionTimestamp: doc.data()?.toggleCompletionTimestamp,
+        親taskId: doc.data()?.親taskId,
       }));
       setTaskList(tasksData);
       console.log("tasksData", tasksData);
@@ -48,7 +58,7 @@ function App() {
             // タイムスタンプを比較して並び替え
             const dateA = a.toggleCompletionTimestamp?.toDate() ?? new Date(0);
             const dateB = b.toggleCompletionTimestamp?.toDate() ?? new Date(0);
-            return dateA - dateB;
+            return dateA.getTime() - dateB.getTime();
           })
       );
     });
@@ -58,7 +68,7 @@ function App() {
   }, []);
 
   const addNewTasksIfNeeded = () => {
-    const newTasks = [];
+    const newTasks: TaskType[] = [];
     tasklist.forEach((task) => {
       if (task.is周期的 === "必ず追加" && tasklist.length !== 0) {
         const diffTime = checkTaskDue(task.期日 + " " + task.時刻);
@@ -73,7 +83,6 @@ function App() {
           const 兄弟tasks = 同一期日tasks.filter(
             (同一期日task) => 同一期日task.親taskId === task.親taskId
           );
-          //console.log(子tasks, 兄弟tasks);
           if (子tasks.length === 0 && 兄弟tasks.length === 0) {
             const newTask = {
               text: task.text,
@@ -83,6 +92,7 @@ function App() {
               周期2: task.周期2,
               周期3: task.周期3,
               親taskId: task.親taskId ?? task.id,
+              completed: false,
             };
             newTasks.push(newTask);
           }
@@ -113,13 +123,13 @@ function App() {
         const { 周期2, 周期3, ...周期除外newTask } = newTask;
         setUnCompletedTasks([
           ...unCompletedTasks,
-          { ...周期除外newTask, isCompleted: false },
+          { ...周期除外newTask, completed: false },
         ]);
         addDocTask(周期除外newTask);
       } else {
         setUnCompletedTasks([
           ...unCompletedTasks,
-          { ...newTask, isCompleted: false },
+          { ...newTask, completed: false },
         ]);
         addDocTask(newTask);
       }

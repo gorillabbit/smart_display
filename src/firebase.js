@@ -30,7 +30,7 @@ export const db = getFirestore(app);
 
 export const addDocTask = (task) => {
   try {
-    addDoc(collection(db, "tasks"), {
+    return addDoc(collection(db, "tasks"), {
       ...task,
       completed: false,
       timestamp: serverTimestamp(),
