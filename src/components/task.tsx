@@ -30,8 +30,8 @@ const toggleCompletion = (
       期日: calculateNext期日(task, new Date()),
       時刻: task.時刻,
       is周期的: "完了後に追加",
-      周期2: task.周期2,
-      周期3: task.周期3,
+      周期日数: task.周期日数,
+      周期単位: task.周期単位,
       親taskId: task.親taskId ?? task.id,
       completed: false,
     };
@@ -91,7 +91,8 @@ const Task: React.FC<TaskProps> = ({ task, setTasks, tasklist }) => {
               {task.text}
             </span>
             <span className="task-周期" style={{ width: "100%" }}>
-              周期{is完了後追加 && " タスク完了後 "} {task.周期2} {task.周期3}
+              周期{is完了後追加 && " タスク完了後 "} {task.周期日数}{" "}
+              {task.周期単位}
             </span>
             <span style={{ width: "100%", textAlign: "right" }}>
               {task.期日 ? "期日 " : ""}

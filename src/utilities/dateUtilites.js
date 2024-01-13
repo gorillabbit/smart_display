@@ -23,7 +23,7 @@ export const checkLastLogCompleted = (lastCompleted) => {
 };
 
 export const calculateNext期日 = (task, 更新元date) => {
-  const 周期日数 = parseInt(task.周期2);
+  const 周期日数 = parseInt(task.周期日数);
   switch (task.周期3) {
     case "日":
       更新元date.setDate(更新元date.getDate() + 周期日数);

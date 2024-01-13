@@ -5,13 +5,7 @@ import Task from "./components/task.tsx";
 import { db, addDocTask, addDocLog } from "./firebase.js";
 import { format } from "date-fns";
 import { checkTaskDue, calculateNext期日 } from "./utilities/dateUtilites.js";
-import {
-  orderBy,
-  collection,
-  onSnapshot,
-  query,
-  Timestamp,
-} from "firebase/firestore";
+import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
 import {
   Task as TaskType,
   Log as LogType,
@@ -27,8 +21,8 @@ const defaultNewTask: TaskType = {
   期日: formattedDate,
   時刻: "00:00",
   is周期的: "周期なし",
-  周期2: "1",
-  周期3: "日",
+  周期日数: "1",
+  周期単位: "日",
   completed: false,
 };
 
@@ -62,8 +56,8 @@ function App() {
         期日: doc.data().期日,
         時刻: doc.data().時刻,
         is周期的: doc.data().is周期的,
-        周期2: doc.data().周期2,
-        周期3: doc.data().周期3,
+        周期日数: doc.data().周期日数,
+        周期単位: doc.data().周期単位,
         completed: doc.data().completed,
         toggleCompletionTimestamp: doc.data()?.toggleCompletionTimestamp,
         親taskId: doc.data()?.親taskId,
@@ -143,8 +137,8 @@ function App() {
               期日: next期日,
               時刻: task.時刻,
               is周期的: "必ず追加",
-              周期2: task.周期2,
-              周期3: task.周期3,
+              周期日数: task.周期日数,
+              周期単位: task.周期単位,
               親taskId: task.親taskId ?? task.id,
               completed: false,
             };
@@ -167,6 +161,10 @@ function App() {
   }, [tasklist]); // 依存配列に tasklist だけを含める
 
   const handleNewTask = (e: { target: { name: any; value: any } }) => {
+    if (e.target.name === "周期日数" && parseInt(e.target.value) <= 0) {
+      alert("0以下は入力できません。");
+      return;
+    }
     setNewTask((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -174,7 +172,9 @@ function App() {
     setNewLog((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleTextInput = (e) => {
+  const handleTextInput = (e: {
+    target: { name: any; value: any } | { name: any; value: any };
+  }) => {
     handleNewTask(e);
     handleNewLog(e);
   };
@@ -183,7 +183,7 @@ function App() {
     if (newTask) {
       //周期のバリデーション
       if (newTask.is周期的 === "周期なし") {
-        const { 周期2, 周期3, ...周期除外newTask } = newTask;
+        const { 周期日数, 周期単位, ...周期除外newTask } = newTask;
         setUnCompletedTasks([
           ...unCompletedTasks,
           { ...周期除外newTask, completed: false },
@@ -283,16 +283,16 @@ function App() {
                 </select>
                 <input
                   className="input-field"
-                  name="周期2"
+                  name="周期日数"
                   type="number"
-                  value={newTask.周期2}
+                  value={newTask.周期日数}
                   onChange={handleNewTask}
                   disabled={newTask.is周期的 === "周期なし"}
                 />
                 <select
                   className="input-field"
-                  name="周期3"
-                  value={newTask.周期3}
+                  name="周期単位"
+                  value={newTask.周期単位}
                   onChange={handleNewTask}
                   disabled={newTask.is周期的 === "周期なし"}
                 >

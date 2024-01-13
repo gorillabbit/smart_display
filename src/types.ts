@@ -7,8 +7,8 @@ export interface Task {
   時刻: string;
   completed: boolean;
   is周期的: string;
-  周期2?: string;
-  周期3?: string;
+  周期日数?: string;
+  周期単位?: string;
   親taskId?: string;
   toggleCompletionTimestamp?: Timestamp;
 }
