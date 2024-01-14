@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./App.css";
-import Clock from "./components/clock.js";
-import Task from "./components/task.tsx";
+import Task from "./components/Task.tsx";
+import TaskInputForm from "./components/TaskInputForm.js";
+import LogInputForm from "./components/LogInputForm.js";
+import Header from "./components/Header.js";
 import { db, addDocTask, addDocLog } from "./firebase.js";
 import { format } from "date-fns";
 import { checkTaskDue, calculateNext期日 } from "./utilities/dateUtilites.js";
@@ -11,7 +13,8 @@ import {
   Log as LogType,
   LogsCompleteLogs as LogsCompleteLogsType,
 } from "./types";
-import Log from "./components/log.tsx";
+import Log from "./components/Log.tsx";
+import ToggleButtons from "./components/ToggleButtons.js";
 
 const now = new Date();
 const formattedDate = format(now, "yyyy-MM-dd");
@@ -209,111 +212,25 @@ function App() {
     }
   };
 
-  const OnButtonStyle = {
-    backgroundColor: "#45a049",
-    margin: "3px 3px 0px 3px",
-  };
-  const OffButtonStyle = {
-    backgroundColor: "#b4b4b4",
-    margin: "3px 3px 6px 3px",
-  };
-
   return (
     <div className="app">
-      <div className="header">
-        <h1>TODOリスト</h1>
-        <Clock />
-      </div>
+      <Header />
       <div className="content" style={{ padding: "0px 30px" }}>
-        <div className="タスク-記録切り替えボタン" style={{ display: "flex" }}>
-          <button
-            className="toggleButton"
-            onClick={() => setIsTask((isTask) => !isTask)}
-            style={isTask ? OnButtonStyle : OffButtonStyle}
-          >
-            タスク
-          </button>
-          <button
-            className="toggleButton"
-            onClick={() => setIsTask((isTask) => !isTask)}
-            style={!isTask ? OnButtonStyle : OffButtonStyle}
-          >
-            記録
-          </button>
-        </div>
+        <ToggleButtons isTask={isTask} setIsTask={setIsTask} />
         <div className="flex-container">
           {isTask ? (
-            <div className="inputForm flex-grow">
-              <div className="text期日Input flex-container">
-                <input
-                  className="textInput input-field flex-grow"
-                  name="text"
-                  type="text"
-                  value={newTask.text || newLog.text}
-                  onChange={handleTextInput}
-                  placeholder="タスクを入力"
-                />
-                <p>期日</p>
-                <input
-                  className="期日Input input-field"
-                  name="期日"
-                  type="date"
-                  value={newTask.期日}
-                  onChange={handleNewTask}
-                />
-                <input
-                  className="時刻Input input-field"
-                  name="時刻"
-                  type="time"
-                  value={newTask.時刻}
-                  onChange={handleNewTask}
-                />
-              </div>
-              <div className="周期Input flex-end-container">
-                <p>周期</p>
-                <select
-                  className="input-field"
-                  name="is周期的"
-                  value={newTask.is周期的}
-                  onChange={handleNewTask}
-                >
-                  <option value="周期なし">周期なし</option>
-                  <option value="完了後に追加">完了後にタスクを追加</option>
-                  <option value="必ず追加">必ず追加</option>
-                </select>
-                <input
-                  className="input-field"
-                  name="周期日数"
-                  type="number"
-                  value={newTask.周期日数}
-                  onChange={handleNewTask}
-                  disabled={newTask.is周期的 === "周期なし"}
-                />
-                <select
-                  className="input-field"
-                  name="周期単位"
-                  value={newTask.周期単位}
-                  onChange={handleNewTask}
-                  disabled={newTask.is周期的 === "周期なし"}
-                >
-                  <option value="日">日</option>
-                  <option value="週">週</option>
-                  <option value="月">月</option>
-                  <option value="年">年</option>
-                </select>
-              </div>
-            </div>
+            <TaskInputForm
+              newTask={newTask}
+              newLog={newLog}
+              updateNewTask={handleNewTask}
+              handleTextInput={handleTextInput}
+            />
           ) : (
-            <div className="textInput flex-container">
-              <input
-                className="textInput input-field flex-grow"
-                name="text"
-                type="text"
-                value={newLog.text || newTask.text}
-                onChange={handleTextInput}
-                placeholder="記録を入力"
-              />
-            </div>
+            <LogInputForm
+              newTask={newTask}
+              newLog={newLog}
+              handleTextInput={handleTextInput}
+            />
           )}
           <button className="input-button" onClick={isTask ? addTask : addLog}>
             追加

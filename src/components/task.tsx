@@ -5,8 +5,8 @@ import { calculateNext期日 } from "../utilities/dateUtilites.js";
 import { getBackgroundColor } from "../utilities/taskUtilites.js";
 
 import { serverTimestamp } from "firebase/firestore";
-import TaskDetail from "./taskDetail.js";
-import { Task as TaskType } from "../types";
+import TaskDetail from "./TaskDetail.js";
+import { Task as TaskType } from "../types.js";
 
 interface TaskProps {
   task: TaskType;
