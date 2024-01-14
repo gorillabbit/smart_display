@@ -319,7 +319,14 @@ function App() {
             追加
           </button>
         </div>
-        <div className="logList" style={{ display: "flex" }}>
+        <div
+          className="logList"
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            flexWrap: "wrap",
+          }}
+        >
           {logList.map((log) => (
             <Log log={log} logsCompleteLogs={logsCompleteLogsList} />
           ))}

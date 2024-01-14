@@ -5,7 +5,7 @@ import {
   Log as LogType,
   LogsCompleteLogs as LogsCompleteLogsType,
 } from "../types";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { checkLastLogCompleted } from "../utilities/dateUtilites";
 
 const LogStyle = {
@@ -48,7 +48,6 @@ const Log = ({ log, logsCompleteLogs }) => {
   const completeLogs = logsCompleteLogs.filter(
     (logsCompleteLog: LogsCompleteLogsType) => logsCompleteLog.logId === log.id
   );
-  const completedCounts = completeLogs.length;
   const lastCompletedLog = completeLogs[0];
   const isLastCompletedAvailable =
     !!lastCompletedLog && !!lastCompletedLog.timestamp;
@@ -66,6 +65,11 @@ const Log = ({ log, logsCompleteLogs }) => {
       };
     }
   }, [lastCompleted, isLastCompletedAvailable]);
+  //これまでの完了回数
+  const completedCounts = completeLogs.length;
+  const todayCompletedCounts = completeLogs.filter(
+    (log) => differenceInDays(new Date(), log.timestamp?.toDate()) < 1
+  );
   return (
     <div style={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
       <div style={{ textAlign: "left" }}>
@@ -75,7 +79,8 @@ const Log = ({ log, logsCompleteLogs }) => {
             ? "前回から " + intervalFromLastCompleted
             : ""}
         </div>
-        <div>{"完了回数 " + completedCounts}</div>
+        <div>{"今日の回数 " + todayCompletedCounts.length}</div>
+        <div>{"通算完了回数 " + completedCounts}</div>
         {isOpen &&
           completeLogs.map((log: LogsCompleteLogsType, index: string) => (
             <CompleteLog completeLog={log} index={index} />
