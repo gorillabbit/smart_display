@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import "./App.css";
 import Task from "./components/Task.tsx";
 import TaskInputForm from "./components/TaskInputForm.js";
@@ -34,9 +34,24 @@ const defaultNewLog: LogType = {
 };
 
 function App() {
-  const [tasklist, setTaskList] = useState<TaskType[]>([]);
-  const [unCompletedTasks, setUnCompletedTasks] = useState<TaskType[]>([]);
-  const [completedTasks, setCompletedTasks] = useState<TaskType[]>([]);
+  const [tasks, setTasks] = useState<TaskType[]>([]);
+  const unCompletedTasks = useMemo(
+    () => tasks.filter((task) => !task.completed),
+    [tasks]
+  );
+  const completedTasks = useMemo(
+    () =>
+      tasks
+        .filter((task) => task.completed)
+        .sort((a, b) => {
+          // タイムスタンプを比較して並び替え
+          const dateA = a.toggleCompletionTimestamp?.toDate() ?? new Date(0);
+          const dateB = b.toggleCompletionTimestamp?.toDate() ?? new Date(0);
+          return dateA.getTime() - dateB.getTime();
+        }),
+    [tasks]
+  );
+
   const [newTask, setNewTask] = useState<TaskType>(defaultNewTask);
   const [isTask, setIsTask] = useState<boolean>(true);
   const [newLog, setNewLog] = useState<LogType>(defaultNewLog);
@@ -65,19 +80,8 @@ function App() {
         toggleCompletionTimestamp: doc.data()?.toggleCompletionTimestamp,
         親taskId: doc.data()?.親taskId,
       }));
-      setTaskList(tasksData);
+      setTasks(tasksData);
       console.log("tasksData", tasksData);
-      setUnCompletedTasks(tasksData.filter((data) => data.completed === false));
-      setCompletedTasks(
-        tasksData
-          .filter((data) => data.completed === true)
-          .sort((a, b) => {
-            // タイムスタンプを比較して並び替え
-            const dateA = a.toggleCompletionTimestamp?.toDate() ?? new Date(0);
-            const dateB = b.toggleCompletionTimestamp?.toDate() ?? new Date(0);
-            return dateA.getTime() - dateB.getTime();
-          })
-      );
     });
 
     //Logの取得
@@ -120,12 +124,12 @@ function App() {
 
   const addNewTasksIfNeeded = () => {
     const newTasks: TaskType[] = [];
-    tasklist.forEach((task) => {
-      if (task.is周期的 === "必ず追加" && tasklist.length !== 0) {
+    tasks.forEach((task) => {
+      if (task.is周期的 === "必ず追加" && tasks.length !== 0) {
         const diffTime = checkTaskDue(task.期日 + " " + task.時刻);
         if (diffTime < 0) {
           const next期日 = calculateNext期日(task, new Date(task.期日));
-          const 同一期日tasks = tasklist?.filter(
+          const 同一期日tasks = tasks?.filter(
             (listTask) => listTask.期日 === next期日
           );
           const 子tasks = 同一期日tasks.filter(
@@ -155,60 +159,57 @@ function App() {
 
   useEffect(() => {
     const newTasks = addNewTasksIfNeeded();
-    if (newTasks.length > 0 && tasklist.length < 10) {
-      setUnCompletedTasks((prevTasks) => [...prevTasks, ...newTasks]);
+    if (newTasks.length > 0 && tasks.length < 10) {
+      setTasks((prevTasks) => [...prevTasks, ...newTasks]);
       newTasks.forEach((newTask) => {
         addDocTask(newTask);
       });
     }
-  }, [tasklist]); // 依存配列に tasklist だけを含める
+  }, [tasks]); // 依存配列に tasklist だけを含める
 
-  const handleNewTask = (e: { target: { name: any; value: any } }) => {
-    if (e.target.name === "周期日数" && parseInt(e.target.value) <= 0) {
+  const handleNewTaskInput = (e) => {
+    const { name, value } = e.target;
+    if (name === "周期日数" && parseInt(value, 10) <= 0) {
       alert("0以下は入力できません。");
       return;
     }
-    setNewTask((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setNewTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNewLog = (e: { target: { name: any; value: any } }) => {
-    setNewLog((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleNewLogInput = (e) => {
+    const { name, value } = e.target;
+    setNewLog((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleTextInput = (e: {
-    target: { name: any; value: any } | { name: any; value: any };
-  }) => {
-    handleNewTask(e);
-    handleNewLog(e);
+  // テキスト入力をハンドル（タスクとログの両方）
+  const handleTextInput = (e) => {
+    handleNewTaskInput(e);
+    handleNewLogInput(e);
   };
 
+  // タスクの追加
   const addTask = () => {
     if (newTask) {
-      //周期のバリデーション
-      if (newTask.is周期的 === "周期なし") {
-        const { 周期日数, 周期単位, ...周期除外newTask } = newTask;
-        setUnCompletedTasks([
-          ...unCompletedTasks,
-          { ...周期除外newTask, completed: false },
-        ]);
-        addDocTask(周期除外newTask);
-      } else {
-        setUnCompletedTasks([
-          ...unCompletedTasks,
-          { ...newTask, completed: false },
-        ]);
-        addDocTask(newTask);
-      }
+      const taskToAdd =
+        newTask.is周期的 === "周期なし" ? omitPeriodicFields(newTask) : newTask;
+      setTasks([...tasks, { ...taskToAdd, completed: false }]);
+      addDocTask(taskToAdd);
       setNewTask(defaultNewTask);
     }
   };
 
+  // 周期的なフィールドを省略
+  function omitPeriodicFields(task) {
+    const { 周期日数, 周期単位, ...rest } = task;
+    return rest;
+  }
+
+  // ログの追加
   const addLog = () => {
     if (newLog) {
-      setLogList((logList) => [...logList, newLog]);
+      setLogList([...logList, newLog]);
       addDocLog(newLog);
       setNewLog(defaultNewLog);
-      setNewTask(defaultNewTask);
     }
   };
 
@@ -222,7 +223,7 @@ function App() {
             <TaskInputForm
               newTask={newTask}
               newLog={newLog}
-              updateNewTask={handleNewTask}
+              updateNewTask={handleNewTaskInput}
               handleTextInput={handleTextInput}
             />
           ) : (
@@ -252,8 +253,8 @@ function App() {
           <Task
             key={task.id}
             task={task}
-            setTasks={setUnCompletedTasks}
-            tasklist={tasklist}
+            setTasks={setTasks}
+            tasklist={tasks}
           />
         ))}
         <div>完了済みタスク</div>
@@ -261,8 +262,8 @@ function App() {
           <Task
             key={task.id}
             task={task}
-            setTasks={setUnCompletedTasks}
-            tasklist={tasklist}
+            setTasks={setTasks}
+            tasklist={tasks}
           />
         ))}
       </div>
