@@ -16,6 +16,7 @@ export interface LogsCompleteLogs {
   id?: string;
   logId: string;
   timestamp?: Timestamp;
+  type?: string;
 }
 
 export interface Log {
@@ -24,4 +25,5 @@ export interface Log {
   親logId?: string;
   timestamp?: Timestamp;
   completeLogs?: LogsCompleteLogs[];
+  interval?: boolean;
 }

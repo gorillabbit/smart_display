@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import "./App.css";
 import Task from "./components/Task.tsx";
 import TaskInputForm from "./components/TaskInputForm.js";
@@ -31,6 +31,7 @@ const defaultNewTask: TaskType = {
 
 const defaultNewLog: LogType = {
   text: "",
+  interval: false,
 };
 
 function App() {
@@ -92,6 +93,7 @@ function App() {
           id: doc.id,
           text: doc.data().text,
           timestamp: doc.data().timestamp,
+          interval: doc.data().interval,
         }));
         setLogList(LogsData);
       }
@@ -109,6 +111,7 @@ function App() {
             id: doc.id,
             logId: doc.data().logId,
             timestamp: doc.data().timestamp,
+            type: doc.data().type,
           }));
         setLogsCompleteLogsList(logsCompleteLogsData);
       }
@@ -231,6 +234,7 @@ function App() {
               newTask={newTask}
               newLog={newLog}
               handleTextInput={handleTextInput}
+              handleNewLogInput={handleNewLogInput}
             />
           )}
           <button className="input-button" onClick={isTask ? addTask : addLog}>

@@ -171,6 +171,16 @@
   margin: 2.5px 0px 0px 5px;
 }
 
+.start {
+  background-color: #3f71dd;
+  margin: 0px 0px 2.5px 5px;
+}
+
+.logButton:disabled {
+  filter: brightness(0.8);
+  cursor: not-allowed;
+}
+
 .matched-radius {
   --matched-radius-padding: 8px;
   --matched-radius-inner-size: 12px;

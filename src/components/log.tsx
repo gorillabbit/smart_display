@@ -7,6 +7,7 @@ import {
 } from "../types";
 import { format, differenceInDays } from "date-fns";
 import { checkLastLogCompleted } from "../utilities/dateUtilites";
+import Stopwatch from "./Stopwatch";
 
 const LogStyle = {
   backgroundColor: "#BEEBC6",
@@ -16,10 +17,20 @@ const LogStyle = {
   display: "flex",
 };
 
-const completeLog = (log: LogType, event) => {
+const logComplete = (log: LogType, event) => {
   event.stopPropagation();
   const logsCompleteLogs = {
     logId: log.id,
+    type: "finish",
+  };
+  addDocLogsCompleteLogs(logsCompleteLogs);
+};
+
+const logStart = (log: LogType, event) => {
+  event.stopPropagation();
+  const logsCompleteLogs = {
+    logId: log.id,
+    type: "start",
   };
   addDocLogsCompleteLogs(logsCompleteLogs);
 };
@@ -48,12 +59,15 @@ const Log = ({ log, logsCompleteLogs }) => {
   const completeLogs = logsCompleteLogs.filter(
     (logsCompleteLog: LogsCompleteLogsType) => logsCompleteLog.logId === log.id
   );
-  const lastCompletedLog = completeLogs[0];
+  const finishLogs = completeLogs.filter((log) => log.type === "finish");
+  const lastCompletedLog = finishLogs[0];
+  const isStarted = completeLogs[0]?.type === "start";
   const isLastCompletedAvailable =
     !!lastCompletedLog && !!lastCompletedLog.timestamp;
   const lastCompleted = isLastCompletedAvailable
     ? format(lastCompletedLog.timestamp.toDate(), "yyyy-MM-dd HH:mm")
     : "";
+
   useEffect(() => {
     if (isLastCompletedAvailable) {
       setIntervalFromLastCompleted(checkLastLogCompleted(lastCompleted));
@@ -66,14 +80,15 @@ const Log = ({ log, logsCompleteLogs }) => {
     }
   }, [lastCompleted, isLastCompletedAvailable]);
   //これまでの完了回数
-  const completedCounts = completeLogs.length;
-  const todayCompletedCounts = completeLogs.filter(
+  const completedCounts = finishLogs.length;
+  const todayCompletedCounts = finishLogs.filter(
     (log) => differenceInDays(new Date(), log.timestamp?.toDate()) < 1
   );
   return (
     <div style={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
       <div style={{ textAlign: "left" }}>
         <div>{log.text}</div>
+        <div>{isStarted && <Stopwatch />}</div>
         <div>
           {isLastCompletedAvailable || lastCompletedLog
             ? "前回から " + intervalFromLastCompleted
@@ -96,7 +111,20 @@ const Log = ({ log, logsCompleteLogs }) => {
           alignContent: "center",
         }}
       >
-        <button className="logButton add" onClick={(e) => completeLog(log, e)}>
+        {log.interval && (
+          <button
+            className="logButton start"
+            onClick={(e) => logStart(log, e)}
+            disabled={isStarted}
+          >
+            開始
+          </button>
+        )}
+        <button
+          className="logButton add"
+          onClick={(e) => logComplete(log, e)}
+          disabled={log.interval ? !isStarted : false}
+        >
           完了
         </button>
         <button
