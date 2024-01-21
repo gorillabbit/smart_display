@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "../App.css";
 import { addDocTask, deleteDocTask, updateDocTask } from "../firebase.js";
 import { calculateNext期日 } from "../utilities/dateUtilites.js";
 import { getBackgroundColor } from "../utilities/taskUtilites.js";

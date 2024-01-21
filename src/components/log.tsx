@@ -4,7 +4,6 @@ import {
   addDocLogsCompleteLogs,
   deleteDocLogsCompleteLogs,
 } from "../firebase";
-import "../App.css";
 import {
   Log as LogType,
   LogsCompleteLogs as LogsCompleteLogsType,

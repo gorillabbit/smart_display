@@ -1,5 +1,4 @@
 import { ToggleButton, FormGroup, TextField } from "@mui/material";
-import "../App.css";
 
 const LogInputForm = ({
   newTask,

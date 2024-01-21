@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from "react";
-import "./App.css";
 import Task from "./components/Task.tsx";
 import TaskInputForm from "./components/TaskInputForm.js";
 import LogInputForm from "./components/LogInputForm.js";
@@ -174,7 +173,7 @@ function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]); // 依存配列に tasklist だけを含める
 
-  const handleNewTaskInput = (name, value) => {
+  const handleNewTaskInput = (name: string, value) => {
     if (name === "周期日数" && parseInt(value, 10) <= 0) {
       alert("0以下は入力できません。");
       return;
@@ -182,12 +181,12 @@ function App() {
     setNewTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNewLogInput = (name, value) => {
+  const handleNewLogInput = (name: string, value) => {
     setNewLog((prev) => ({ ...prev, [name]: value }));
   };
 
   // テキスト入力をハンドル（タスクとログの両方）
-  const handleTextInput = (name, value) => {
+  const handleTextInput = (name: string, value) => {
     handleNewTaskInput(name, value);
     handleNewLogInput(name, value);
   };
@@ -233,11 +232,11 @@ function App() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
-      <div className="app">
+      <Box textAlign="center" fontFamily="Noto Sans JP">
         <Header />
-        <div className="content" style={{ padding: "0px 30px" }}>
+        <Box m={2}>
           <ToggleButtons isTask={isTask} setIsTask={setIsTask} />
-          <Box className="flex-container">
+          <Box display="flex">
             {isTask ? (
               <TaskInputForm
                 newTask={newTask}
@@ -256,7 +255,6 @@ function App() {
             <Button
               sx={{ my: 1 }}
               variant="contained"
-              className="input-button"
               onClick={isTask ? addTask : addLog}
             >
               追加
@@ -292,8 +290,8 @@ function App() {
               />
             ))}
           </Masonry>
-        </div>
-      </div>
+        </Box>
+      </Box>
     </LocalizationProvider>
   );
 }
