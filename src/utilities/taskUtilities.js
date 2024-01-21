@@ -1,4 +1,4 @@
-import { checkTaskDue } from "../utilities/dateUtilites.js";
+import { checkTaskDue } from "./dateUtilities.js";
 
 export const getBackgroundColor = (dueDate) => {
   const diffDays = checkTaskDue(dueDate);

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { addDocTask, deleteDocTask, updateDocTask } from "../firebase.js";
-import { calculateNext期日 } from "../utilities/dateUtilites.js";
-import { getBackgroundColor } from "../utilities/taskUtilites.js";
+import { calculateNext期日 } from "../utilities/dateUtilities.js";
+import { getBackgroundColor } from "../utilities/taskUtilities.js";
 
 import { serverTimestamp } from "firebase/firestore";
 import TaskDetail from "./TaskDetail.js";

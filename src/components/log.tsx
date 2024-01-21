@@ -9,7 +9,7 @@ import {
   LogsCompleteLogs as LogsCompleteLogsType,
 } from "../types";
 import { format, differenceInDays } from "date-fns";
-import { checkLastLogCompleted } from "../utilities/dateUtilites";
+import { checkLastLogCompleted } from "../utilities/dateUtilities";
 import Stopwatch from "./Stopwatch";
 import { Box, Button, Typography, Card } from "@mui/material";
 
