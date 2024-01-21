@@ -6,7 +6,11 @@ import LogInputForm from "./components/LogInputForm.js";
 import Header from "./components/Header.js";
 import { db, addDocTask, addDocLog } from "./firebase.js";
 import { format } from "date-fns";
-import { checkTaskDue, calculateNext期日 } from "./utilities/dateUtilites.js";
+import {
+  checkTaskDue,
+  calculateNext期日,
+  formatTimeJa,
+} from "./utilities/dateUtilites.js";
 import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
 import {
   Task as TaskType,
@@ -15,14 +19,17 @@ import {
 } from "./types";
 import Log from "./components/Log.tsx";
 import ToggleButtons from "./components/ToggleButtons.js";
+import { Button, Box, Typography } from "@mui/material";
+import { Masonry } from "@mui/lab";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
 const now = new Date();
-const formattedDate = format(now, "yyyy-MM-dd");
 
 const defaultNewTask: TaskType = {
   text: "",
-  期日: formattedDate,
-  時刻: "00:00",
+  期日: now,
+  時刻: now,
   is周期的: "周期なし",
   周期日数: "1",
   周期単位: "日",
@@ -168,10 +175,10 @@ function App() {
         addDocTask(newTask);
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tasks]); // 依存配列に tasklist だけを含める
 
-  const handleNewTaskInput = (e) => {
-    const { name, value } = e.target;
+  const handleNewTaskInput = (name, value) => {
     if (name === "周期日数" && parseInt(value, 10) <= 0) {
       alert("0以下は入力できません。");
       return;
@@ -179,25 +186,38 @@ function App() {
     setNewTask((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleNewLogInput = (e) => {
-    const { name, value } = e.target;
+  const handleNewLogInput = (name, value) => {
+    console.log(name, value);
     setNewLog((prev) => ({ ...prev, [name]: value }));
   };
 
   // テキスト入力をハンドル（タスクとログの両方）
-  const handleTextInput = (e) => {
-    handleNewTaskInput(e);
-    handleNewLogInput(e);
+  const handleTextInput = (name, value) => {
+    handleNewTaskInput(name, value);
+    handleNewLogInput(name, value);
+  };
+
+  const validateTask = (task) => {
+    return {
+      ...task,
+      期日: format(task.期日, "yyyy年MM月dd日"),
+      時刻: format(task.時刻, "HH時mm分"),
+    };
   };
 
   // タスクの追加
   const addTask = () => {
     if (newTask) {
+      const validatedTask = validateTask(newTask);
       const taskToAdd =
-        newTask.is周期的 === "周期なし" ? omitPeriodicFields(newTask) : newTask;
+        validatedTask.is周期的 === "周期なし"
+          ? omitPeriodicFields(validatedTask)
+          : validatedTask;
+
       setTasks([...tasks, { ...taskToAdd, completed: false }]);
       addDocTask(taskToAdd);
       setNewTask(defaultNewTask);
+      setNewLog(defaultNewLog);
     }
   };
 
@@ -217,61 +237,69 @@ function App() {
   };
 
   return (
-    <div className="app">
-      <Header />
-      <div className="content" style={{ padding: "0px 30px" }}>
-        <ToggleButtons isTask={isTask} setIsTask={setIsTask} />
-        <div className="flex-container">
-          {isTask ? (
-            <TaskInputForm
-              newTask={newTask}
-              newLog={newLog}
-              updateNewTask={handleNewTaskInput}
-              handleTextInput={handleTextInput}
-            />
-          ) : (
-            <LogInputForm
-              newTask={newTask}
-              newLog={newLog}
-              handleTextInput={handleTextInput}
-              handleNewLogInput={handleNewLogInput}
-            />
-          )}
-          <button className="input-button" onClick={isTask ? addTask : addLog}>
-            追加
-          </button>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <div className="app">
+        <Header />
+        <div className="content" style={{ padding: "0px 30px" }}>
+          <ToggleButtons isTask={isTask} setIsTask={setIsTask} />
+          <Box className="flex-container">
+            {isTask ? (
+              <TaskInputForm
+                newTask={newTask}
+                newLog={newLog}
+                updateNewTask={handleNewTaskInput}
+                handleTextInput={handleTextInput}
+              />
+            ) : (
+              <LogInputForm
+                newTask={newTask}
+                newLog={newLog}
+                handleTextInput={handleTextInput}
+                handleNewLogInput={handleNewLogInput}
+              />
+            )}
+            <Button
+              sx={{ my: 1 }}
+              variant="contained"
+              className="input-button"
+              onClick={isTask ? addTask : addLog}
+            >
+              追加
+            </Button>
+          </Box>
+          <Masonry
+            sx={{ margin: "2px" }}
+            columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}
+          >
+            {logList.map((log) => (
+              <Log log={log} logsCompleteLogs={logsCompleteLogsList} />
+            ))}
+          </Masonry>
+          <Typography variant="h5">タスク一覧</Typography>
+          <Masonry
+            sx={{ margin: "2px" }}
+            columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}
+          >
+            {unCompletedTasks.map((task) => (
+              <Task
+                key={task.id}
+                task={task}
+                setTasks={setTasks}
+                tasklist={tasks}
+              />
+            ))}
+            {completedTasks.map((task) => (
+              <Task
+                key={task.id}
+                task={task}
+                setTasks={setTasks}
+                tasklist={tasks}
+              />
+            ))}
+          </Masonry>
         </div>
-        <div
-          className="logList"
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            flexWrap: "wrap",
-          }}
-        >
-          {logList.map((log) => (
-            <Log log={log} logsCompleteLogs={logsCompleteLogsList} />
-          ))}
-        </div>
-        {unCompletedTasks.map((task) => (
-          <Task
-            key={task.id}
-            task={task}
-            setTasks={setTasks}
-            tasklist={tasks}
-          />
-        ))}
-        <div>完了済みタスク</div>
-        {completedTasks.map((task) => (
-          <Task
-            key={task.id}
-            task={task}
-            setTasks={setTasks}
-            tasklist={tasks}
-          />
-        ))}
       </div>
-    </div>
+    </LocalizationProvider>
   );
 }
 

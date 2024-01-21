@@ -8,13 +8,11 @@ import {
 import { format, differenceInDays } from "date-fns";
 import { checkLastLogCompleted } from "../utilities/dateUtilites";
 import Stopwatch from "./Stopwatch";
+import { Box, Button, Typography, Card } from "@mui/material";
 
 const LogStyle = {
-  backgroundColor: "#BEEBC6",
-  borderRadius: "8px",
-  padding: "4px",
-  margin: "2px",
-  display: "flex",
+  backgroundColor: "#dadada",
+  margin: "4px",
 };
 
 const logComplete = (log: LogType, event) => {
@@ -41,13 +39,13 @@ const deleteLog = (id, event) => {
 };
 
 const CompleteLog = ({ completeLog, index }) => {
-  if (completeLog.timestamp) {
-    return (
-      <div key={index}>
-        {format(completeLog.timestamp.toDate(), "yyyy-MM-dd HH:mm")}
-      </div>
-    );
-  }
+  return completeLog.timestamp ? (
+    <Typography key={index} variant="body2" color="text.secondary">
+      {format(completeLog.timestamp.toDate(), "yyyy-MM-dd HH:mm")}
+    </Typography>
+  ) : (
+    <Box />
+  );
 };
 
 const Log = ({ log, logsCompleteLogs }) => {
@@ -85,56 +83,68 @@ const Log = ({ log, logsCompleteLogs }) => {
     (log) => differenceInDays(new Date(), log.timestamp?.toDate()) < 1
   );
   return (
-    <div style={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
-      <div style={{ textAlign: "left" }}>
-        <div>{log.text}</div>
-        <div>{isStarted && <Stopwatch />}</div>
-        <div>
+    <Card sx={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
+      <Box style={{ textAlign: "left", margin: "16px" }}>
+        <Typography variant="h5" textAlign="center">
+          {log.text}
+        </Typography>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          visibility={isStarted ? "visible" : "hidden"}
+        >
+          {isStarted ? <Stopwatch /> : <div>blank</div>}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           {isLastCompletedAvailable || lastCompletedLog
             ? "前回から " + intervalFromLastCompleted
             : ""}
-        </div>
-        <div>{"今日の回数 " + todayCompletedCounts.length}</div>
-        <div>{"通算完了回数 " + completedCounts}</div>
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {"今日の回数 " + todayCompletedCounts.length}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {"通算完了回数 " + completedCounts}
+        </Typography>
         {isOpen &&
           completeLogs.map((log: LogsCompleteLogsType, index: string) => (
             <CompleteLog completeLog={log} index={index} />
           ))}
-      </div>
+      </Box>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          marginLeft: "4px",
-          flex: "1",
-          alignContent: "center",
-        }}
-      >
-        {log.interval && (
-          <button
-            className="logButton start"
+      <Box display="flex" width="100%">
+        {log.interval && !isStarted && (
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ borderRadius: "0px" }}
             onClick={(e) => logStart(log, e)}
-            disabled={isStarted}
           >
             開始
-          </button>
+          </Button>
         )}
-        <button
-          className="logButton add"
-          onClick={(e) => logComplete(log, e)}
-          disabled={log.interval ? !isStarted : false}
-        >
-          完了
-        </button>
-        <button
-          className="logButton delete"
+        {(!log.interval || isStarted) && (
+          <Button
+            fullWidth
+            variant="contained"
+            color="success"
+            sx={{ borderRadius: "0px" }}
+            onClick={(e) => logComplete(log, e)}
+          >
+            完了
+          </Button>
+        )}
+        <Button
+          fullWidth
+          variant="contained"
+          color="error"
+          sx={{ borderRadius: "0px" }}
           onClick={(e) => deleteLog(log.id, e)}
         >
           削除
-        </button>
-      </div>
-    </div>
+        </Button>
+      </Box>
+    </Card>
   );
 };
 

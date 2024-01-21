@@ -7,12 +7,18 @@ import { getBackgroundColor } from "../utilities/taskUtilites.js";
 import { serverTimestamp } from "firebase/firestore";
 import TaskDetail from "./TaskDetail.js";
 import { Task as TaskType } from "../types.js";
+import { Box, Button, Card, Typography } from "@mui/material";
 
 interface TaskProps {
   task: TaskType;
   setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
   tasklist?: TaskType[];
   type?: string;
+}
+
+interface ChildTaskProps {
+  tasks: TaskType[];
+  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
 }
 
 const toggleCompletion = (
@@ -41,26 +47,22 @@ const toggleCompletion = (
 };
 
 const childTaskStyle = { border: "solid 2px #ffffff" };
-function ChildTasks({ tasks, setTasks }) {
+const ChildTasks: React.FC<ChildTaskProps> = ({ tasks, setTasks }) => {
   return (
-    <div style={childTaskStyle}>
+    <Box style={childTaskStyle}>
       子task
       {tasks.map((子task) => (
         <Task type="子task" key={子task.id} task={子task} setTasks={setTasks} />
       ))}
-    </div>
+    </Box>
   );
-}
+};
 
 const Task: React.FC<TaskProps> = ({ task, setTasks, tasklist }) => {
   const backgroundColor = getBackgroundColor(task.期日 + " " + task.時刻);
   const tasklistStyle = {
-    display: "flex",
-    alignItems: "stretch" /* アイテムを縦方向に伸ばす */,
     backgroundColor: task.completed ? "#c0c0c0" : backgroundColor,
-    margin: "5px 0px",
     color: task.completed ? "#5f5f5f" : "",
-    borderRadius: "4px",
   };
 
   const 子tasks = tasklist?.filter((listTask) => listTask.親taskId === task.id);
@@ -69,49 +71,48 @@ const Task: React.FC<TaskProps> = ({ task, setTasks, tasklist }) => {
   const is完了後追加 = task.is周期的 === "完了後に追加";
   const [open, setOpen] = useState(false);
 
-  const handleTaskClick = (event) => {
-    event.stopPropagation();
-    setOpen((prevOpen) => !prevOpen);
-  };
-
   return (
-    <li style={tasklistStyle} onClick={handleTaskClick}>
-      <div className="task-content">
-        <label className="custom-checkbox">
-          <input
-            type="checkbox"
-            checked={task.completed}
-            onChange={() => toggleCompletion(task, setTasks)}
-          />
-          <span className="checkbox-mark"></span>
-        </label>
-        <div style={{ width: "100%" }}>
-          <div style={{ display: "flex", width: "100%" }}>
-            <span className="task-text" style={{ width: "100%" }}>
-              {task.text}
-            </span>
-            <span className="task-周期" style={{ width: "100%" }}>
-              周期{is完了後追加 && " タスク完了後 "} {task.周期日数}{" "}
-              {task.周期単位}
-            </span>
-            <span style={{ width: "100%", textAlign: "right" }}>
-              {task.期日 ? "期日 " : ""}
-              {task.期日} {task.時刻}
-            </span>
-          </div>
-          {open && <TaskDetail task={task} />}
-          {open && 子tasks && 子tasks.length > 0 && (
-            <ChildTasks tasks={子tasks} setTasks={setTasks} />
-          )}
-          {open && 親tasks && 親tasks.length > 0 && (
-            <ChildTasks tasks={親tasks} setTasks={setTasks} />
-          )}
-        </div>
-      </div>
-      <button className="deleteButton" onClick={() => deleteDocTask(task.id)}>
-        削除
-      </button>
-    </li>
+    <Card sx={tasklistStyle} onClick={() => setOpen((prevOpen) => !prevOpen)}>
+      <Box sx={{ textAlign: "left", margin: "16px" }}>
+        <Typography variant="h5" textAlign="center">
+          {task.text}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          周期{is完了後追加 && " タスク完了後 "} {task.周期日数} {task.周期単位}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {task.期日 ? "期日 " : ""}
+          {task.期日?.toString()} {task.時刻?.toString()}
+        </Typography>
+        {open && <TaskDetail task={task} />}
+        {open && 子tasks && 子tasks.length > 0 && (
+          <ChildTasks tasks={子tasks} setTasks={setTasks} />
+        )}
+        {open && 親tasks && 親tasks.length > 0 && (
+          <ChildTasks tasks={親tasks} setTasks={setTasks} />
+        )}
+      </Box>
+      <Box display="flex" width="100%">
+        <Button
+          fullWidth
+          color={task.completed ? "warning" : "success"}
+          variant="contained"
+          sx={{ borderRadius: "0px" }}
+          onClick={() => toggleCompletion(task, setTasks)}
+        >
+          {task.completed ? "取り消す" : "完了"}
+        </Button>
+        <Button
+          fullWidth
+          color="error"
+          variant="contained"
+          sx={{ borderRadius: "0px" }}
+          onClick={() => deleteDocTask(task.id)}
+        >
+          削除
+        </Button>
+      </Box>
+    </Card>
   );
 };
 

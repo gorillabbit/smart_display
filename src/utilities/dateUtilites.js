@@ -3,11 +3,15 @@ import {
   differenceInDays,
   differenceInHours,
   differenceInMinutes,
+  parse,
 } from "date-fns";
+import ja from "date-fns/locale/ja";
 
 export const checkTaskDue = (dueString) => {
   const today = new Date();
-  const due = new Date(dueString);
+  const due = parse(dueString, "yyyy年MM月dd日 HH時mm分", new Date(), {
+    locale: ja,
+  });
   const diffTime = due - today;
   return diffTime / (1000 * 60 * 60 * 24);
 };
@@ -20,6 +24,14 @@ export const checkLastLogCompleted = (lastCompleted) => {
   const diffMinutes = differenceInMinutes(today, due) % 60;
   const result = `${diffDays}日${diffHours}時間${diffMinutes}分`;
   return result;
+};
+
+export const formatDateJa = (date) => {
+  return format(date, "yyyy年MM月dd日");
+};
+
+export const formatTimeJa = (time) => {
+  return format(time, "HH時mm分");
 };
 
 export const calculateNext期日 = (task, 更新元date) => {
@@ -40,5 +52,5 @@ export const calculateNext期日 = (task, 更新元date) => {
     default:
       break;
   }
-  return format(更新元date, "yyyy-MM-dd");
+  return formatDateJa(更新元date);
 };

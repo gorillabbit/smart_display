@@ -20,7 +20,7 @@ const Stopwatch = () => {
     return () => clearInterval(interval);
   }, []);
 
-  return <div>経過時間 {formatElapsedTime(elapsedTime)}</div>;
+  return <div>経過 {formatElapsedTime(elapsedTime)}</div>;
 };
 
 export default Stopwatch;

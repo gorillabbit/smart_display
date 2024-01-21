@@ -3,8 +3,8 @@ import { Timestamp } from "firebase/firestore";
 export interface Task {
   id?: string;
   text: string;
-  期日: string;
-  時刻: string;
+  期日: string | Date;
+  時刻: string | Date;
   completed: boolean;
   is周期的: string;
   周期日数?: string;

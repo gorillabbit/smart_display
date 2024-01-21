@@ -1,3 +1,4 @@
+import { ToggleButton, FormGroup, TextField } from "@mui/material";
 import "../App.css";
 
 const LogInputForm = ({
@@ -6,31 +7,27 @@ const LogInputForm = ({
   handleTextInput,
   handleNewLogInput,
 }) => {
+  console.log(newLog);
   return (
-    <div className="textInput flex-container">
-      <input
-        className="textInput input-field flex-grow"
-        name="text"
-        type="text"
+    <FormGroup row={true} sx={{ gap: 1, m: 1, width: "100%", display: "flex" }}>
+      <TextField
+        required
+        label="ログ"
         value={newLog.text || newTask.text}
-        onChange={handleTextInput}
+        onChange={(e) => handleTextInput("text", e.target.value)}
         placeholder="記録を入力"
+        sx={{ width: "80%" }}
       />
-      <p>スパン</p>
-      <input
-        className="input-field"
-        name="interval"
-        id="interval"
-        type="checkbox"
-        value={newLog.interval}
-        onChange={handleNewLogInput}
-        style={{
-          cursor: "pointer",
-          position: "relative",
-          width: "auto",
-        }}
-      />
-    </div>
+      <ToggleButton
+        sx={{ width: "18%" }}
+        color="primary"
+        value="check"
+        selected={newLog.interval}
+        onChange={() => handleNewLogInput("interval", !newLog.interval)}
+      >
+        スパン
+      </ToggleButton>
+    </FormGroup>
   );
 };
 

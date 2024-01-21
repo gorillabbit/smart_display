@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { Box, Typography } from "@mui/material";
 
 function TaskDetails({ task }) {
   // 完了タイムスタンプのフォーマット
@@ -9,13 +10,13 @@ function TaskDetails({ task }) {
       : null;
 
   return (
-    <div className="task-details" style={{ width: "100%", textAlign: "right" }}>
+    <Box>
       {task.completed && (
-        <span style={{ width: "100%", textAlign: "right" }}>
+        <Typography variant="body2" color="text.secondary">
           済 {completionTimestamp}
-        </span>
+        </Typography>
       )}
-    </div>
+    </Box>
   );
 }
 
