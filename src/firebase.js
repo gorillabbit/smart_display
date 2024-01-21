@@ -85,3 +85,11 @@ export const addDocLogsCompleteLogs = (log) => {
     console.error("タスク追加エラー: ", e);
   }
 };
+
+export const deleteDocLogsCompleteLogs = (id) => {
+  try {
+    deleteDoc(doc(db, "logsCompleteLogs", id));
+  } catch (e) {
+    console.error("logsCompleteLogs削除エラー: ", e);
+  }
+};

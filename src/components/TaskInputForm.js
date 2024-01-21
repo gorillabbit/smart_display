@@ -9,7 +9,7 @@ const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
         required
         label="タスク"
         value={newTask.text || newLog.text}
-        onChange={(value) => handleTextInput("text", value.target.value)}
+        onChange={(e) => handleTextInput("text", e.target.value)}
       />
       <DatePicker
         label="期日-年月日"
@@ -25,7 +25,7 @@ const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
       <Select
         label="周期"
         value={newTask.is周期的}
-        onChange={(value) => updateNewTask("is周期的", value.target.value)}
+        onChange={(e) => updateNewTask("is周期的", e.target.value)}
       >
         <MenuItem value="周期なし">周期なし</MenuItem>
         <MenuItem value="完了後に追加">完了後にタスクを追加</MenuItem>
@@ -35,13 +35,12 @@ const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
         label="周期日数"
         type="number"
         value={newTask.周期日数}
-        onChange={(value) => updateNewTask("周期日数", value.target.value)}
+        onChange={(e) => updateNewTask("周期日数", e.target.value)}
         disabled={newTask.is周期的 === "周期なし"}
       />
       <Select
-        label="tani"
         value={newTask.周期単位}
-        onChange={(value) => updateNewTask("周期単位", value.target.value)}
+        onChange={(e) => updateNewTask("周期単位", e.target.value)}
         disabled={newTask.is周期的 === "周期なし"}
       >
         <MenuItem value="日">日</MenuItem>

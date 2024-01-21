@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { deleteDocLog, addDocLogsCompleteLogs } from "../firebase";
+import {
+  deleteDocLog,
+  addDocLogsCompleteLogs,
+  deleteDocLogsCompleteLogs,
+} from "../firebase";
 import "../App.css";
 import {
   Log as LogType,
@@ -31,11 +35,6 @@ const logStart = (log: LogType, event) => {
     type: "start",
   };
   addDocLogsCompleteLogs(logsCompleteLogs);
-};
-
-const deleteLog = (id, event) => {
-  event.stopPropagation();
-  deleteDocLog(id);
 };
 
 const CompleteLog = ({ completeLog, index }) => {
@@ -82,6 +81,15 @@ const Log = ({ log, logsCompleteLogs }) => {
   const todayCompletedCounts = finishLogs.filter(
     (log) => differenceInDays(new Date(), log.timestamp?.toDate()) < 1
   );
+
+  const deleteLog = (id, event) => {
+    event.stopPropagation();
+    deleteDocLog(id);
+    completeLogs.forEach((element) => {
+      deleteDocLogsCompleteLogs(element.id);
+    });
+  };
+
   return (
     <Card sx={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
       <Box style={{ textAlign: "left", margin: "16px" }}>

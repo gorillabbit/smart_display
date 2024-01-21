@@ -6,11 +6,7 @@ import LogInputForm from "./components/LogInputForm.js";
 import Header from "./components/Header.js";
 import { db, addDocTask, addDocLog } from "./firebase.js";
 import { format } from "date-fns";
-import {
-  checkTaskDue,
-  calculateNext期日,
-  formatTimeJa,
-} from "./utilities/dateUtilites.js";
+import { checkTaskDue, calculateNext期日 } from "./utilities/dateUtilites.js";
 import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
 import {
   Task as TaskType,
@@ -187,7 +183,6 @@ function App() {
   };
 
   const handleNewLogInput = (name, value) => {
-    console.log(name, value);
     setNewLog((prev) => ({ ...prev, [name]: value }));
   };
 
