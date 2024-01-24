@@ -1,12 +1,12 @@
 import { Masonry } from "@mui/lab";
 import Log from "./Log";
 import React, { useState, useEffect } from "react";
-import { db } from "../firebase.js";
+import { db } from "../../firebase.js";
 import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
 import {
   Log as LogType,
   LogsCompleteLogs as LogsCompleteLogsType,
-} from "../types";
+} from "../../types.js";
 
 const LogList = () => {
   const [logList, setLogList] = useState<LogType[]>([]);
@@ -16,36 +16,33 @@ const LogList = () => {
 
   useEffect(() => {
     //Logの取得
-    const unsubscribeLog = onSnapshot(
-      query(collection(db, "logs")),
-      (querySnapshot) => {
-        const LogsData: LogType[] = querySnapshot.docs.map((doc) => ({
+    const fetchLogs = () => {
+      const logQuery = query(collection(db, "logs"));
+      return onSnapshot(logQuery, (querySnapshot) => {
+        const LogsData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
-          text: doc.data().text,
-          timestamp: doc.data().timestamp,
-          interval: doc.data().interval,
+          ...(doc.data() as LogType),
         }));
         setLogList(LogsData);
-      }
-    );
+      });
+    };
 
-    const logsCompleteLogsQuery = query(
-      collection(db, "logsCompleteLogs"),
-      orderBy("timestamp", "desc")
-    );
-    const unsubscribeLogsCompleteLogs = onSnapshot(
-      logsCompleteLogsQuery,
-      (querySnapshot) => {
-        const logsCompleteLogsData: LogsCompleteLogsType[] =
-          querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            logId: doc.data().logId,
-            timestamp: doc.data().timestamp,
-            type: doc.data().type,
-          }));
+    const fetchLogsCompleteLogs = () => {
+      const logsCompleteLogsQuery = query(
+        collection(db, "logsCompleteLogs"),
+        orderBy("timestamp", "desc")
+      );
+      return onSnapshot(logsCompleteLogsQuery, (querySnapshot) => {
+        const logsCompleteLogsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...(doc.data() as LogsCompleteLogsType),
+        }));
         setLogsCompleteLogsList(logsCompleteLogsData);
-      }
-    );
+      });
+    };
+
+    const unsubscribeLog = fetchLogs();
+    const unsubscribeLogsCompleteLogs = fetchLogsCompleteLogs();
 
     // コンポーネントがアンマウントされるときに購読を解除
     return () => {
@@ -59,7 +56,7 @@ const LogList = () => {
       columns={{ xs: 2, sm: 3, md: 4, lg: 5, xl: 6 }}
     >
       {logList.map((log) => (
-        <Log log={log} logsCompleteLogs={logsCompleteLogsList} />
+        <Log log={log} logsCompleteLogs={logsCompleteLogsList} key={log.id} />
       ))}
     </Masonry>
   );

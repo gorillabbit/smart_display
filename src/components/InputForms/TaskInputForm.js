@@ -3,8 +3,9 @@ import { DatePicker, TimePicker } from "@mui/x-date-pickers";
 
 const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
   return (
-    <FormGroup row={true} sx={{ gap: 1, m: 1 }}>
+    <FormGroup row={true} sx={{ gap: 1, m: 1, width: "100%" }}>
       <TextField
+        autoFocus
         fullWidth
         required
         label="タスク"

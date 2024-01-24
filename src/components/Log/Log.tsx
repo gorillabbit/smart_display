@@ -3,19 +3,23 @@ import {
   deleteDocLog,
   addDocLogsCompleteLogs,
   deleteDocLogsCompleteLogs,
-} from "../firebase";
+} from "../../firebase";
 import {
   Log as LogType,
   LogsCompleteLogs as LogsCompleteLogsType,
-} from "../types";
+} from "../../types";
 import { format, differenceInDays } from "date-fns";
-import { checkLastLogCompleted } from "../utilities/dateUtilities";
-import Stopwatch from "./Stopwatch";
+import { checkLastLogCompleted } from "../../utilities/dateUtilities";
 import { Box, Button, Typography, Card } from "@mui/material";
+import { BodyTypography } from "../TypographyWrapper";
+import Stopwatch from "./Stopwatch";
+import LogHeader from "./LogHeader";
+import CompleteLog from "./CompleteLog";
 
 const LogStyle = {
-  backgroundColor: "#dadada",
+  backgroundColor: "#dfdfdf",
   margin: "4px",
+  positon: "absolute",
 };
 
 const logComplete = (log: LogType, event) => {
@@ -34,16 +38,6 @@ const logStart = (log: LogType, event) => {
     type: "start",
   };
   addDocLogsCompleteLogs(logsCompleteLogs);
-};
-
-const CompleteLog = ({ completeLog, index }) => {
-  return completeLog.timestamp ? (
-    <Typography key={index} variant="body2" color="text.secondary">
-      {format(completeLog.timestamp.toDate(), "yyyy-MM-dd HH:mm")}
-    </Typography>
-  ) : (
-    <Box />
-  );
 };
 
 const Log = ({ log, logsCompleteLogs }) => {
@@ -81,7 +75,10 @@ const Log = ({ log, logsCompleteLogs }) => {
     (log) => differenceInDays(new Date(), log.timestamp?.toDate()) < 1
   );
 
-  const deleteLog = (id, event) => {
+  const deleteLog = (
+    id: string,
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ) => {
     event.stopPropagation();
     deleteDocLog(id);
     completeLogs.forEach((element) => {
@@ -91,36 +88,37 @@ const Log = ({ log, logsCompleteLogs }) => {
 
   return (
     <Card sx={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
-      <Box style={{ textAlign: "left", margin: "16px" }}>
+      <LogHeader lastCompleted={lastCompleted} log={log} />
+      <Box m={2} textAlign="left">
         <Typography variant="h5" textAlign="center">
           {log.text}
         </Typography>
-        <Typography
-          variant="body2"
-          color="text.secondary"
+        <BodyTypography
           visibility={isStarted ? "visible" : "hidden"}
-        >
-          {isStarted ? <Stopwatch /> : <div>blank</div>}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {isLastCompletedAvailable || lastCompletedLog
-            ? "前回から " + intervalFromLastCompleted
-            : ""}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {"今日の回数 " + todayCompletedCounts.length}
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          {"通算完了回数 " + completedCounts}
-        </Typography>
+          text={isStarted ? <Stopwatch /> : <div>blank</div>}
+        />
+        <BodyTypography
+          text={
+            isLastCompletedAvailable || lastCompletedLog
+              ? "前回から " + intervalFromLastCompleted
+              : ""
+          }
+        />
+        {log.interval && (
+          <BodyTypography
+            text={"標準間隔 " + log.intervalNum + log.intervalUnit}
+          />
+        )}
+        <BodyTypography text={"今日の回数 " + todayCompletedCounts.length} />
+        <BodyTypography text={"通算完了回数 " + completedCounts} />
         {isOpen &&
           completeLogs.map((log: LogsCompleteLogsType, index: string) => (
-            <CompleteLog completeLog={log} index={index} />
+            <CompleteLog completeLog={log} key={log.id} />
           ))}
       </Box>
 
       <Box display="flex" width="100%">
-        {log.interval && !isStarted && (
+        {log.duration && !isStarted && (
           <Button
             fullWidth
             variant="contained"
@@ -130,7 +128,7 @@ const Log = ({ log, logsCompleteLogs }) => {
             開始
           </Button>
         )}
-        {(!log.interval || isStarted) && (
+        {(!log.duration || isStarted) && (
           <Button
             fullWidth
             variant="contained"

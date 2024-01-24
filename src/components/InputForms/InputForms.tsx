@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import TaskInputForm from "./TaskInputForm.js";
 import LogInputForm from "./LogInputForm.js";
-import { addDocTask, addDocLog } from "../firebase.js";
+import { addDocTask, addDocLog } from "../../firebase.js";
 import { format } from "date-fns";
-import { Task as TaskType, Log as LogType } from "../types";
+import { Task as TaskType, Log as LogType } from "../../types.js";
 import ToggleButtons from "./ToggleButtons.js";
 import { Button, Box } from "@mui/material";
 
@@ -21,7 +21,10 @@ const defaultNewTask: TaskType = {
 
 const defaultNewLog: LogType = {
   text: "",
+  duration: false,
   interval: false,
+  intervalNum: 1,
+  intervalUnit: "日",
 };
 
 const InputForms = () => {
@@ -38,6 +41,10 @@ const InputForms = () => {
   };
 
   const handleNewLogInput = (name: string, value) => {
+    if (name === "intervalNum" && parseInt(value, 10) <= 0) {
+      alert("0以下は入力できません。");
+      return;
+    }
     setNewLog((prev) => ({ ...prev, [name]: value }));
   };
 

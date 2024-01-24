@@ -4,6 +4,10 @@ import {
   differenceInHours,
   differenceInMinutes,
   parse,
+  differenceInMonths,
+  differenceInWeeks,
+  differenceInYears,
+  differenceInSeconds,
 } from "date-fns";
 import ja from "date-fns/locale/ja";
 
@@ -16,13 +20,30 @@ export const checkTaskDue = (dueString) => {
   return diffTime / (1000 * 60 * 60 * 24);
 };
 
-export const checkLastLogCompleted = (lastCompleted) => {
+export const getSpanDate = (date) => {
   const today = new Date();
-  const due = new Date(lastCompleted);
+  const due = new Date(date);
+  const diffYears = differenceInYears(today, due);
+  const diffMonths = differenceInMonths(today, due);
+  const diffWeeks = differenceInWeeks(today, due);
   const diffDays = differenceInDays(today, due);
   const diffHours = differenceInHours(today, due) % 24;
   const diffMinutes = differenceInMinutes(today, due) % 60;
-  const result = `${diffDays}日${diffHours}時間${diffMinutes}分`;
+  const diffSeconds = differenceInSeconds(today, due) % 60;
+  return {
+    diffYears: diffYears,
+    diffMonths: diffMonths,
+    diffWeeks: diffWeeks,
+    diffDays: diffDays,
+    diffHours: diffHours,
+    diffMinutes: diffMinutes,
+    diffSeconds: diffSeconds,
+  };
+};
+
+export const checkLastLogCompleted = (lastCompleted) => {
+  const span = getSpanDate(lastCompleted);
+  const result = `${span.diffDays}日${span.diffHours}時間${span.diffMinutes}分`;
   return result;
 };
 

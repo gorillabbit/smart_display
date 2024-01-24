@@ -3,9 +3,9 @@ import { Box, Typography } from "@mui/material";
 import Task from "./Task";
 import React, { useEffect, useMemo, useState } from "react";
 
-import { db } from "../firebase.js";
+import { db } from "../../firebase.js";
 import { orderBy, collection, onSnapshot, query } from "firebase/firestore";
-import { Task as TaskType } from "../types.js";
+import { Task as TaskType } from "../../types.js";
 
 const TaskList = () => {
   const [tasks, setTasks] = useState<TaskType[]>([]);
@@ -47,7 +47,6 @@ const TaskList = () => {
         親taskId: doc.data()?.親taskId,
       }));
       setTasks(tasksData);
-      console.log("tasksData", tasksData);
     });
 
     // コンポーネントがアンマウントされるときに購読を解除

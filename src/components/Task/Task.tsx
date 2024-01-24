@@ -1,23 +1,19 @@
 import React, { useState } from "react";
-import { addDocTask, deleteDocTask, updateDocTask } from "../firebase.js";
-import { calculateNext期日 } from "../utilities/dateUtilities.js";
-import { getBackgroundColor } from "../utilities/taskUtilities.js";
+import { addDocTask, deleteDocTask, updateDocTask } from "../../firebase.js";
+import { calculateNext期日 } from "../../utilities/dateUtilities.js";
+import { getBackgroundColor } from "../../utilities/taskUtilities.js";
 
 import { serverTimestamp } from "firebase/firestore";
 import TaskDetail from "./TaskDetail.js";
-import { Task as TaskType } from "../types.js";
+import { Task as TaskType } from "../../types.js";
 import { Box, Button, Card, Typography } from "@mui/material";
+import ChildTasks from "./ChildTask";
 
 interface TaskProps {
   task: TaskType;
   setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
   tasklist?: TaskType[];
   type?: string;
-}
-
-interface ChildTaskProps {
-  tasks: TaskType[];
-  setTasks: React.Dispatch<React.SetStateAction<TaskType[]>>;
 }
 
 const toggleCompletion = (
@@ -45,18 +41,6 @@ const toggleCompletion = (
   }
 };
 
-const childTaskStyle = { border: "solid 2px #ffffff" };
-const ChildTasks: React.FC<ChildTaskProps> = ({ tasks, setTasks }) => {
-  return (
-    <Box style={childTaskStyle}>
-      子task
-      {tasks.map((子task) => (
-        <Task type="子task" key={子task.id} task={子task} setTasks={setTasks} />
-      ))}
-    </Box>
-  );
-};
-
 const Task: React.FC<TaskProps> = ({ task, setTasks, tasklist }) => {
   const backgroundColor = getBackgroundColor(task.期日 + " " + task.時刻);
   const tasklistStyle = {
@@ -72,7 +56,7 @@ const Task: React.FC<TaskProps> = ({ task, setTasks, tasklist }) => {
 
   return (
     <Card sx={tasklistStyle} onClick={() => setOpen((prevOpen) => !prevOpen)}>
-      <Box sx={{ textAlign: "left", margin: "16px" }}>
+      <Box m={2} textAlign="left">
         <Typography variant="h5" textAlign="center">
           {task.text}
         </Typography>

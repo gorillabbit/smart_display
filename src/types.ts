@@ -25,5 +25,8 @@ export interface Log {
   親logId?: string;
   timestamp?: Timestamp;
   completeLogs?: LogsCompleteLogs[];
-  interval?: boolean;
+  duration: boolean;
+  interval: boolean;
+  intervalNum?: number;
+  intervalUnit?: string;
 }
