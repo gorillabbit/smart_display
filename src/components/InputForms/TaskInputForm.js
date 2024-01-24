@@ -16,12 +16,14 @@ const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
         label="期日-年月日"
         value={newTask.期日}
         onChange={(value) => updateNewTask("期日", value)}
+        sx={{ maxWidth: 150 }}
       />
       <TimePicker
         ampm={false}
         label="期日-時刻"
         value={newTask.時刻}
         onChange={(value) => updateNewTask("時刻", value)}
+        sx={{ maxWidth: 120 }}
       />
       <Select
         label="周期"
@@ -38,6 +40,7 @@ const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
         value={newTask.周期日数}
         onChange={(e) => updateNewTask("周期日数", e.target.value)}
         disabled={newTask.is周期的 === "周期なし"}
+        sx={{ maxWidth: 100 }}
       />
       <Select
         value={newTask.周期単位}

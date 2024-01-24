@@ -24,7 +24,6 @@ const LogInputForm = ({
         placeholder="記録を入力"
       />
       <ToggleButton
-        color="primary"
         value="check"
         selected={newLog.duration}
         onChange={() => handleNewLogInput("duration", !newLog.duration)}
@@ -32,7 +31,6 @@ const LogInputForm = ({
         スパン
       </ToggleButton>
       <ToggleButton
-        color="primary"
         value="check"
         selected={newLog.interval}
         onChange={() => handleNewLogInput("interval", !newLog.interval)}
