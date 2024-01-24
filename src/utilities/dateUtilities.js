@@ -44,7 +44,7 @@ export const getSpanDate = (date) => {
 export const checkLastLogCompleted = (lastCompleted) => {
   const span = getSpanDate(lastCompleted);
   const result = `${span.diffDays}日${span.diffHours}時間${span.diffMinutes}分`;
-  return result;
+  return result.replace(/\b0[^\d\s]+\s*/g, "");
 };
 
 export const formatDateJa = (date) => {

@@ -31,4 +31,7 @@ export interface Log {
   intervalNum?: number;
   intervalUnit?: string;
   availableMemo: boolean;
+  availableVoiceAnnounce: boolean;
+  voiceAnnounceNum?: number;
+  voiceAnnounceUnit?: string;
 }

@@ -7,12 +7,13 @@ import {
 import { LogsCompleteLogs as LogsCompleteLogsType } from "../../types";
 import { format, differenceInDays } from "date-fns";
 import { checkLastLogCompleted } from "../../utilities/dateUtilities";
-import { Box, Button, Typography, Card } from "@mui/material";
+import { Box, Button, Typography, Card, Chip } from "@mui/material";
 import { BodyTypography } from "../TypographyWrapper";
 import Stopwatch from "./Stopwatch";
 import LogHeader from "./LogHeader";
 import CompleteLog from "./CompleteLog";
 import MemoDialog from "./MemoDialog";
+import ChipWrapper from "../ChipWrapper";
 
 const Log = ({ log, logsCompleteLogs }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -36,9 +37,10 @@ const Log = ({ log, logsCompleteLogs }) => {
 
   useEffect(() => {
     if (isLastCompletedAvailable) {
-      setIntervalFromLastCompleted(checkLastLogCompleted(lastCompleted));
+      const lastLogCompleted = checkLastLogCompleted(lastCompleted) || "0分";
+      setIntervalFromLastCompleted(lastLogCompleted);
       const timerId = setInterval(() => {
-        setIntervalFromLastCompleted(checkLastLogCompleted(lastCompleted));
+        setIntervalFromLastCompleted(lastLogCompleted);
       }, 1000 * 60); // 1分ごとに更新
       return () => {
         clearInterval(timerId);
@@ -101,22 +103,25 @@ const Log = ({ log, logsCompleteLogs }) => {
           </Typography>
           <BodyTypography
             visibility={isStarted ? "visible" : "hidden"}
-            text={isStarted ? <Stopwatch /> : <div>blank</div>}
+            text={isStarted ? <Stopwatch log={log} /> : <div>blank</div>}
           />
-          <BodyTypography
-            text={
-              isLastCompletedAvailable || lastCompletedLog
-                ? "前回から " + intervalFromLastCompleted
-                : ""
-            }
-          />
+          {intervalFromLastCompleted && (
+            <ChipWrapper label={"前回から" + intervalFromLastCompleted} />
+          )}
+
           {log.interval && (
-            <BodyTypography
-              text={"標準間隔 " + log.intervalNum + log.intervalUnit}
+            <ChipWrapper
+              label={"標準間隔" + log.intervalNum + log.intervalUnit}
             />
           )}
-          <BodyTypography text={"今日の回数 " + todayCompletedCounts.length} />
-          <BodyTypography text={"通算完了回数 " + completedCounts} />
+          <ChipWrapper label={"本日" + todayCompletedCounts.length + "回"} />
+          <ChipWrapper label={"通算" + completedCounts + "回"} />
+          {log.availableVoiceAnnounce && (
+            <ChipWrapper
+              label={"音声案内 " + log.voiceAnnounceNum + log.voiceAnnounceUnit}
+            />
+          )}
+
           {isOpen &&
             completeLogs.map((log: LogsCompleteLogsType) => (
               <CompleteLog completeLog={log} key={log.id} />
