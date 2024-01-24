@@ -90,7 +90,9 @@ const LogInputForm = () => {
         <ToggleButton
           value="check"
           selected={newLog.availableMemo}
-          onChange={() => handleNewLogInput("memo", !newLog.availableMemo)}
+          onChange={() =>
+            handleNewLogInput("availableMemo", !newLog.availableMemo)
+          }
         >
           完了時メモ
         </ToggleButton>

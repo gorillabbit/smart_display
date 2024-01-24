@@ -4,10 +4,7 @@ import {
   addDocLogsCompleteLogs,
   deleteDocLogsCompleteLogs,
 } from "../../firebase";
-import {
-  Log as LogType,
-  LogsCompleteLogs as LogsCompleteLogsType,
-} from "../../types";
+import { LogsCompleteLogs as LogsCompleteLogsType } from "../../types";
 import { format, differenceInDays } from "date-fns";
 import { checkLastLogCompleted } from "../../utilities/dateUtilities";
 import { Box, Button, Typography, Card } from "@mui/material";
@@ -15,33 +12,12 @@ import { BodyTypography } from "../TypographyWrapper";
 import Stopwatch from "./Stopwatch";
 import LogHeader from "./LogHeader";
 import CompleteLog from "./CompleteLog";
-
-const LogStyle = {
-  backgroundColor: "#dfdfdf",
-  margin: "4px",
-  positon: "absolute",
-};
-
-const logComplete = (log: LogType, event) => {
-  event.stopPropagation();
-  const logsCompleteLogs = {
-    logId: log.id,
-    type: "finish",
-  };
-  addDocLogsCompleteLogs(logsCompleteLogs);
-};
-
-const logStart = (log: LogType, event) => {
-  event.stopPropagation();
-  const logsCompleteLogs = {
-    logId: log.id,
-    type: "start",
-  };
-  addDocLogsCompleteLogs(logsCompleteLogs);
-};
+import MemoDialog from "./MemoDialog";
 
 const Log = ({ log, logsCompleteLogs }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isOpenMemoDialog, setIsOpenMemoDialog] = useState<boolean>(false);
+  const [memo, setMemo] = useState<string>("");
   //前回からの経過時間を表示する
   const [intervalFromLastCompleted, setIntervalFromLastCompleted] =
     useState<string>("");
@@ -75,81 +51,119 @@ const Log = ({ log, logsCompleteLogs }) => {
     (log) => differenceInDays(new Date(), log.timestamp?.toDate()) < 1
   );
 
-  const deleteLog = (
-    id: string,
+  const logComplete = () => {
+    const logsCompleteLogs = {
+      logId: log.id,
+      type: "finish",
+      memo: memo,
+    };
+    addDocLogsCompleteLogs(logsCompleteLogs);
+  };
+
+  const handleLogComplete = (
     event: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
     event.stopPropagation();
-    deleteDocLog(id);
+    if (log.availableMemo) {
+      setIsOpenMemoDialog(true);
+      return;
+    } else {
+      logComplete();
+    }
+  };
+
+  const logStart = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    event.stopPropagation();
+    const logsCompleteLogs = {
+      logId: log.id,
+      type: "start",
+    };
+    addDocLogsCompleteLogs(logsCompleteLogs);
+  };
+
+  const deleteLog = () => {
+    deleteDocLog(log.id);
     completeLogs.forEach((element) => {
       deleteDocLogsCompleteLogs(element.id);
     });
   };
 
   return (
-    <Card sx={LogStyle} onClick={() => setIsOpen((prevOpen) => !prevOpen)}>
-      <LogHeader lastCompleted={lastCompleted} log={log} />
-      <Box m={2} textAlign="left">
-        <Typography variant="h5" textAlign="center">
-          {log.text}
-        </Typography>
-        <BodyTypography
-          visibility={isStarted ? "visible" : "hidden"}
-          text={isStarted ? <Stopwatch /> : <div>blank</div>}
-        />
-        <BodyTypography
-          text={
-            isLastCompletedAvailable || lastCompletedLog
-              ? "前回から " + intervalFromLastCompleted
-              : ""
-          }
-        />
-        {log.interval && (
+    <Box>
+      <Card
+        sx={{ backgroundColor: "#dfdfdf" }}
+        onClick={() => setIsOpen((prevOpen) => !prevOpen)}
+      >
+        <LogHeader lastCompleted={lastCompleted} log={log} />
+        <Box m={2} textAlign="left">
+          <Typography variant="h5" textAlign="center">
+            {log.text}
+          </Typography>
           <BodyTypography
-            text={"標準間隔 " + log.intervalNum + log.intervalUnit}
+            visibility={isStarted ? "visible" : "hidden"}
+            text={isStarted ? <Stopwatch /> : <div>blank</div>}
           />
-        )}
-        <BodyTypography text={"今日の回数 " + todayCompletedCounts.length} />
-        <BodyTypography text={"通算完了回数 " + completedCounts} />
-        {isOpen &&
-          completeLogs.map((log: LogsCompleteLogsType, index: string) => (
-            <CompleteLog completeLog={log} key={log.id} />
-          ))}
-      </Box>
+          <BodyTypography
+            text={
+              isLastCompletedAvailable || lastCompletedLog
+                ? "前回から " + intervalFromLastCompleted
+                : ""
+            }
+          />
+          {log.interval && (
+            <BodyTypography
+              text={"標準間隔 " + log.intervalNum + log.intervalUnit}
+            />
+          )}
+          <BodyTypography text={"今日の回数 " + todayCompletedCounts.length} />
+          <BodyTypography text={"通算完了回数 " + completedCounts} />
+          {isOpen &&
+            completeLogs.map((log: LogsCompleteLogsType) => (
+              <CompleteLog completeLog={log} key={log.id} />
+            ))}
+        </Box>
 
-      <Box display="flex" width="100%">
-        {log.duration && !isStarted && (
+        <Box display="flex" width="100%">
+          {log.duration && !isStarted && (
+            <Button
+              fullWidth
+              variant="contained"
+              sx={{ borderRadius: "0px" }}
+              onClick={(e) => logStart(e)}
+            >
+              開始
+            </Button>
+          )}
+          {(!log.duration || isStarted) && (
+            <Button
+              fullWidth
+              variant="contained"
+              color="success"
+              sx={{ borderRadius: "0px" }}
+              onClick={(e) => handleLogComplete(e)}
+            >
+              完了
+            </Button>
+          )}
           <Button
             fullWidth
             variant="contained"
+            color="error"
             sx={{ borderRadius: "0px" }}
-            onClick={(e) => logStart(log, e)}
+            onClick={() => deleteLog()}
           >
-            開始
+            削除
           </Button>
-        )}
-        {(!log.duration || isStarted) && (
-          <Button
-            fullWidth
-            variant="contained"
-            color="success"
-            sx={{ borderRadius: "0px" }}
-            onClick={(e) => logComplete(log, e)}
-          >
-            完了
-          </Button>
-        )}
-        <Button
-          fullWidth
-          variant="contained"
-          color="error"
-          sx={{ borderRadius: "0px" }}
-          onClick={(e) => deleteLog(log.id, e)}
-        >
-          削除
-        </Button>
-      </Box>
-    </Card>
+        </Box>
+      </Card>
+      <MemoDialog
+        isOpen={isOpenMemoDialog}
+        setIsOpen={setIsOpenMemoDialog}
+        memo={memo}
+        setMemo={setMemo}
+        logComplete={logComplete}
+      />
+    </Box>
   );
 };
 
