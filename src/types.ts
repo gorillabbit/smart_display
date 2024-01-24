@@ -17,6 +17,7 @@ export interface LogsCompleteLogs {
   logId: string;
   timestamp?: Timestamp;
   type?: string;
+  memo: string;
 }
 
 export interface Log {
@@ -29,4 +30,5 @@ export interface Log {
   interval: boolean;
   intervalNum?: number;
   intervalUnit?: string;
+  availableMemo: boolean;
 }
