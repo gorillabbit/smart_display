@@ -34,24 +34,26 @@ const TaskInputForm = ({ newTask, newLog, updateNewTask, handleTextInput }) => {
         <MenuItem value="完了後に追加">完了後にタスクを追加</MenuItem>
         <MenuItem value="必ず追加">必ず追加</MenuItem>
       </Select>
-      <TextField
-        label="周期日数"
-        type="number"
-        value={newTask.周期日数}
-        onChange={(e) => updateNewTask("周期日数", e.target.value)}
-        disabled={newTask.is周期的 === "周期なし"}
-        sx={{ maxWidth: 100 }}
-      />
-      <Select
-        value={newTask.周期単位}
-        onChange={(e) => updateNewTask("周期単位", e.target.value)}
-        disabled={newTask.is周期的 === "周期なし"}
-      >
-        <MenuItem value="日">日</MenuItem>
-        <MenuItem value="週">週</MenuItem>
-        <MenuItem value="月">月</MenuItem>
-        <MenuItem value="年">年</MenuItem>
-      </Select>
+      {newTask.is周期的 !== "周期なし" && (
+        <TextField
+          label="周期日数"
+          type="number"
+          value={newTask.周期日数}
+          onChange={(e) => updateNewTask("周期日数", e.target.value)}
+          sx={{ maxWidth: 100 }}
+        />
+      )}
+      {newTask.is周期的 !== "周期なし" && (
+        <Select
+          value={newTask.周期単位}
+          onChange={(e) => updateNewTask("周期単位", e.target.value)}
+        >
+          <MenuItem value="日">日</MenuItem>
+          <MenuItem value="週">週</MenuItem>
+          <MenuItem value="月">月</MenuItem>
+          <MenuItem value="年">年</MenuItem>
+        </Select>
+      )}
     </FormGroup>
   );
 };
