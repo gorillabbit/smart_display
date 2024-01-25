@@ -14,6 +14,8 @@ import LogHeader from "./LogHeader";
 import CompleteLog from "./CompleteLog";
 import MemoDialog from "./MemoDialog";
 import ChipWrapper from "../ChipWrapper";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { IconName } from "@fortawesome/fontawesome-svg-core";
 
 const Log = ({ log, logsCompleteLogs }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -99,6 +101,9 @@ const Log = ({ log, logsCompleteLogs }) => {
         <LogHeader lastCompleted={lastCompleted} log={log} />
         <Box m={2} textAlign="left">
           <Typography variant="h5" textAlign="center">
+            {log.icon && (
+              <FontAwesomeIcon icon={["fas", log.icon as IconName]} />
+            )}
             {log.text}
           </Typography>
           <BodyTypography

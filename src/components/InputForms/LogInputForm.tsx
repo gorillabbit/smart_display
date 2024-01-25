@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import { addDocLog } from "../../firebase.js";
 import { Log as LogType } from "../../types.js";
 import StyledCheckbox from "./StyledCheckbox";
+import FontAwesomeIconPicker from "./FontAwesomeIconPicker";
 
 const defaultNewLog: LogType = {
   text: "",
@@ -22,6 +23,7 @@ const defaultNewLog: LogType = {
   availableVoiceAnnounce: false,
   voiceAnnounceNum: 1,
   voiceAnnounceUnit: "分",
+  icon: "",
 };
 
 const LogInputForm = () => {
@@ -45,7 +47,6 @@ const LogInputForm = () => {
   return (
     <Box display="flex">
       <FormGroup row={true} sx={{ gap: 1, m: 1, width: "100%" }}>
-        <FontAwesomeIconPicker />
         <TextField
           fullWidth
           autoFocus
@@ -54,6 +55,10 @@ const LogInputForm = () => {
           value={newLog.text}
           onChange={(e) => handleNewLogInput("text", e.target.value)}
           placeholder="記録を入力"
+        />
+        <FontAwesomeIconPicker
+          value={newLog.icon}
+          onChange={handleNewLogInput}
         />
         <StyledCheckbox
           value={newLog.duration}

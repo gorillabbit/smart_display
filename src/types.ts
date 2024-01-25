@@ -11,6 +11,7 @@ export interface Task {
   周期単位?: string;
   親taskId?: string;
   toggleCompletionTimestamp?: Timestamp;
+  icon?: string;
 }
 export interface LogsCompleteLogs {
   id?: string;
@@ -34,4 +35,5 @@ export interface Log {
   availableVoiceAnnounce: boolean;
   voiceAnnounceNum?: number;
   voiceAnnounceUnit?: string;
+  icon?: string;
 }

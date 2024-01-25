@@ -11,6 +11,7 @@ import React, { useState } from "react";
 import { addDocTask } from "../../firebase.js";
 import { format } from "date-fns";
 import { Task as TaskType } from "../../types.js";
+import FontAwesomeIconPicker from "./FontAwesomeIconPicker";
 
 const now = new Date();
 
@@ -22,6 +23,7 @@ const defaultNewTask: TaskType = {
   周期日数: "1",
   周期単位: "日",
   completed: false,
+  icon: "",
 };
 
 const TaskInputForm = () => {
@@ -70,6 +72,10 @@ const TaskInputForm = () => {
           label="タスク"
           value={newTask.text}
           onChange={(e) => handleNewTaskInput("text", e.target.value)}
+        />
+        <FontAwesomeIconPicker
+          value={newTask.icon}
+          onChange={handleNewTaskInput}
         />
         <DatePicker
           label="期日-年月日"
